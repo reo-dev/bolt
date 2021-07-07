@@ -1,0 +1,159 @@
+5	후방카메라/감지기	subclass/2020/3/31/51fdb08c90634b43b96a3af322ab8066_subclass.jpg	1	1
+6	하이패스	subclass/2020/3/31/884daba42f3b4f8ab35695569ea0004c_subclass.jpg	1	1
+7	블랙박스	subclass/2020/3/31/3b61a72cb2f5400fb6a971840449b587_subclass.jpg	1	1
+8	내비게이션	subclass/2020/3/31/7253d6f2aac44a1cbd98d34fcea0234d_subclass.jpg	1	1
+9	전자직헙회로(메모리 및 시스템반도체)	subclass/2020/3/31/78797c775385422aa210909e9d617b8a_subclass.JPG	53	3
+43	모니터	subclass/2020/3/31/4423533a87b04c07b0de6075956c7196_subclass.jpg	32	9
+46	헤드셋/스피커/웹캠	subclass/2020/3/31/41053893c82448a4948ea534a6dd23dc_subclass.jpg	32	9
+11	전자레인지	subclass/2020/4/9/6f8c8a634cb34732b7ea3c5519715503_subclass.jpg	18	5
+12	오븐	subclass/2020/4/9/860d39f0c58247ffb29901f43aaa0735_subclass.jpg	18	5
+13	가스레인지	subclass/2020/4/9/9e440f0aafbc4939be04935c29a102fe_subclass.jpg	18	5
+14	전기레인지	subclass/2020/4/9/dc36523513e644ebaf39ec29673c055f_subclass.jpg	18	5
+15	식기세척/건조기	subclass/2020/4/9/835836668b5049c7a444bb0fde0f168a_subclass.jpg	18	5
+16	믹서기/블렌더	subclass/2020/4/9/04c8bbdc34d340af8db3be425b8d9d20_subclass.jpg	18	5
+17	커피메이커/머신	subclass/2020/4/9/0830f56959bd471ea2b3be237483a662_subclass.jpg	18	5
+18	빙수기/제빙기	subclass/2020/4/9/37f99953bd93407f9b40b56d57764856_subclass.jpg	18	5
+19	전기포트	subclass/2020/4/9/0d09266e50d64a8383ed1b81c70cffd9_subclass.jpg	18	5
+20	에어프라이어	subclass/2020/4/9/743ef25681e74bcea928c7a4515c76d2_subclass.jpg	18	5
+21	튀김기	subclass/2020/4/9/e6df6edc8aec42d6859503452a7ea356_subclass.jpg	18	5
+22	토스터	subclass/2020/4/9/6e8780b569a64e3480a63ad313fa9774_subclass.jpg	18	5
+24	전기쿠커	subclass/2020/4/9/3ab95c3122e743d490f355f89c2f812b_subclass.jpg	18	5
+25	약탕기/영양식제조	subclass/2020/4/9/f92ddfd2730c4dadbcb184960308298a_subclass.jpg	18	5
+26	측정계량/기타가전	subclass/2020/4/9/9eab0d1ea4f04d2fa5d3e20d5afe8991_subclass.jpg	18	5
+27	음식물처리기	subclass/2020/4/9/103a248dee2241b19c3713394c63b80a_subclass.jpg	18	5
+28	환풍기/레인지후드	subclass/2020/4/9/062112b733eb4e7b9102d57acbed0453_subclass.jpg	18	5
+29	전동/정밀공구	subclass/2020/4/9/73c81d3bcdcf4e9caf082e136b4d3645_subclass.jpg	23	6
+30	수공구/절단도구	subclass/2020/4/9/a2667416a2d14408b5115f0ad343f699_subclass.jpg	23	6
+31	공구함	subclass/2020/4/9/63d0989ea7024b3db6331ad17243daab_subclass.jpg	23	6
+32	측정/측량도구	subclass/2020/4/9/019a0678df454095bb3f6c81e7343e8d_subclass.jpg	23	6
+33	배관/건축자재	subclass/2020/4/9/6d77b2943b174258b7667820d3946962_subclass.jpg	23	6
+34	사다리/운반용품	subclass/2020/4/9/f5a42eeeedd144a48931132cdef1e9a1_subclass.jpg	23	6
+35	모터/에어공구	subclass/2020/4/9/efd4d117326242e786d197e9c85f0d27_subclass.jpg	23	6
+36	나사/못/체결도구	subclass/2020/4/9/9eed498ad7774bbfa9c5084e5d86229d_subclass.jpg	23	6
+37	접착/보수용품	subclass/2020/4/9/cf88a44b5e6b430d9117f6ccdbab4526_subclass.jpg	23	6
+38	토치/용접공구	subclass/2020/4/9/da079ac9f8c948268027e478d60f17cf_subclass.jpg	23	6
+39	페인트/도구	subclass/2020/4/9/d3209718973344c9a882f503b834882d_subclass.jpg	23	6
+40	노트북	subclass/2020/4/9/2e94dbd5502b423b8b274266b9d8bfe8_subclass.jpg	32	9
+41	태블릿PC 및 악세서리	subclass/2020/4/9/19e8469bd2014eb6973e63c133e42dca_subclass.jpg	32	9
+42	데스크탑	subclass/2020/4/9/aec0a0b3162941059c27fefe95d54df8_subclass.jpg	32	9
+44	프린터/복합기	subclass/2020/4/9/948c9b1b00dd43cea35e2ba2bee3f387_subclass.jpg	32	9
+45	키보드/마우스	subclass/2020/4/9/81576bba344a4559b9123d77fa3f5922_subclass.jpg	32	9
+47	저장장치	subclass/2020/4/9/1f01ea0468044db69d3f419a607523a2_subclass.jpg	32	9
+48	공유기/네트워크	subclass/2020/4/9/d8bd669e01224639a38b199a5b3a2d27_subclass.jpg	32	9
+49	부품	subclass/2020/4/9/9a852d41e8eb4d51b4c8dd739d0cbab1_subclass.jpg	32	9
+50	주변기기	subclass/2020/4/9/8e314204241947578a402224e7d68acb_subclass.jpg	32	9
+51	휴대폰 액세서리	subclass/2020/4/9/465631eb9f01401ba9e47d8ab61f07bd_subclass.jpg	33	9
+52	배터리/충전/케이블	subclass/2020/4/9/f42d64e2990c4ca09cf699ab9ae18b79_subclass.jpg	33	9
+54	메모리카드/리더기	subclass/2020/4/9/270af15dbdd249b2b400bdb6426ec529_subclass.jpg	33	9
+53	스마트워치/밴드	subclass/2020/4/9/038ba7a5cce048858a9544d766c136f9_subclass.jpg	33	9
+55	휴대폰 및 부품	subclass/2020/4/9/cc5610a6d41c4b62b33f21059e1224d3_subclass.jpg	33	9
+57	헤드폰	subclass/2020/4/9/9109e508852f475389952dde8303e7f7_subclass.jpg	34	9
+58	스피커	subclass/2020/4/9/375e48de17a84480bb734f4c41dcd6d2_subclass.jpg	34	9
+56	이어폰	subclass/2020/4/9/8b5354b6fe5a450b909ee462fc714531_subclass.jpg	34	9
+59	홈시어터/오디오	subclass/2020/4/9/8d55df4ef4454b6dbed9cba9cc235ab8_subclass.jpg	34	9
+60	라디오/카세트/MP3	subclass/2020/4/9/048476436ea641f78cbc74b88ed89c9b_subclass.jpg	34	9
+61	녹음기	subclass/2020/4/9/901dd4b64bf0477ab8351dfe154fa03e_subclass.jpg	34	9
+62	마이크	subclass/2020/4/9/5f865bbefd9e4c61bb064915d13ec09e_subclass.jpg	34	9
+63	음향 액세서리	subclass/2020/4/9/3451194baffe488e927dea8ce67bf22a_subclass.jpg	34	9
+64	카메라	subclass/2020/4/9/2f4878a0359a45f5b2ef37ce3e706722_subclass.jpg	35	9
+65	마이크/믹서	subclass/2020/4/9/1144d8a2286246a0972bf57da20c2018_subclass.jpg	35	9
+67	조명/배경	subclass/2020/4/9/964e664c437b4959a464f3d49eb3226a_subclass.jpg	35	9
+66	삼각대/셀카봉	subclass/2020/4/9/6bfcdaffaa1949b78c8d7fe6d0914d36_subclass.jpg	35	9
+68	저장장치/배터리	subclass/2020/4/9/ea27b0fd12eb458bb1d7d047da81b120_subclass.jpg	35	9
+97	전동칫솔/살균기	subclass/2020/3/31/97821722f0dd408680b8a379012235e3_subclass.jpg	39	9
+98	학습용 스탠드	subclass/2020/3/31/6616db1d9fa64b70942179c069353081_subclass.jpg	39	9
+99	전화기/무전기	subclass/2020/3/31/64fda230bba245658a1b4e345f68a546_subclass.jpg	39	9
+102	몸매관리/마사지	subclass/2020/3/31/2856d0fc3ab449f98f39f11770255844_subclass.jpg	40	9
+70	에어컨	subclass/2020/4/9/a789000f4d914518a12d67b338f677df_subclass.jpg	36	9
+71	제습기	subclass/2020/4/9/79bf33db335d404cb0e30bfb8e07d346_subclass.jpg	36	9
+72	서큘레이터	subclass/2020/4/9/823e31f3a1964a549c66b64e70d21edc_subclass.jpg	36	9
+75	모기/해충 퇴치기	subclass/2020/4/9/de4d223753e04dbb8c81b66c9f0ba4ac_subclass.jpg	36	9
+73	냉풍기	subclass/2020/4/9/0f7a0f9641ae4bff8ac49d1dd46c2805_subclass.jpg	36	9
+76	가습기/에어워셔	subclass/2020/4/9/3bca5da361d945daa7c94f1578f142e6_subclass.jpg	36	9
+77	히터/온풍기	subclass/2020/4/9/8755e8243f0f4009989c5fd676a71edb_subclass.jpg	36	9
+78	손난로/발난로	subclass/2020/4/9/3288faa2f5b641deb552ea14dc658985_subclass.jpg	36	9
+79	TV	subclass/2020/4/9/edba8d4ad483413498472d094c2ccbf6_subclass.jpg	37	9
+80	TV 액세서리	subclass/2020/4/9/9b737a53b3d24a009940d4a36d81e42b_subclass.jpg	37	9
+81	블루레이/DVD/DIVX	subclass/2020/4/9/c851301876fb45108d1a3b30f3afd5d2_subclass.jpg	37	9
+82	무선/스틱청소기	subclass/2020/4/9/6386a9b8a2fc4d2da2c0e3e9d7d4ac98_subclass.jpg	38	9
+83	진공청소기	subclass/2020/4/9/06422d6525ef4f15ae4736d42283625b_subclass.jpg	38	9
+84	로봇청소기	subclass/2020/4/9/6f55dfbb974a45259e7f85fd76f8cd52_subclass.jpg	38	9
+85	물걸레청소기	subclass/2020/4/9/c4665232b36a49b987dedb1fd76970e9_subclass.jpg	38	9
+86	침구청소기	subclass/2020/4/9/c6d483fcf23b4bad88763e6e94d56cd7_subclass.jpg	38	9
+87	핸디청소기	subclass/2020/4/9/83f5f4f459ce4e23b123d3c17c776aa5_subclass.jpg	38	9
+89	차량용청소기	subclass/2020/4/9/bb04b35dbb3541e58d71547d78ebc8ba_subclass.jpg	38	9
+88	스팀청소기	subclass/2020/4/9/7fdf85fac3e34261a3bdaa8d0e640ea8_subclass.jpg	38	9
+90	업소용청소기	subclass/2020/4/9/0922ae86c09e4450b12bdd2afb7d8a92_subclass.jpg	38	9
+91	필터/액세서리	subclass/2020/4/9/90957099b62845618e607bb83f822c7c_subclass.jpg	38	9
+92	세탁기/건조기	subclass/2020/4/9/2759db468f7146d79141007d6a1b1c81_subclass.jpg	39	9
+93	다리미/재봉/보풀	subclass/2020/4/9/8590338bf7be4f1a93e4a41f81ec862c_subclass.jpg	39	9
+94	공기청정기	subclass/2020/4/9/8ec23c378b1e4783825b672a2e16302b_subclass.jpg	39	9
+95	도어룩/비디오폰	subclass/2020/4/9/8d4ce5366f7149abb95c09e447a720a2_subclass.jpg	39	9
+96	비데/온수기	subclass/2020/4/9/f49c2bf8d65043f6ac79ac1e6d3f1443_subclass.jpg	39	9
+100	헤어스타일러	subclass/2020/4/9/c317d9a2d45a41e59ede911893bf6deb_subclass.jpg	40	9
+101	두피/헤어관리	subclass/2020/4/9/90c2084beea540e19ab08f4728a00e32_subclass.jpg	40	9
+103	체중관리/측정기	subclass/2020/4/9/b1fd4767bf2148c5ac95a1beed6219b4_subclass.jpg	40	9
+104	전기면도기	subclass/2020/4/9/bef8d1d2d6354463b4260f95cc6c2be9_subclass.jpg	40	9
+105	제모기/이발기	subclass/2020/4/9/21235e6d7cad44cc86dfc3afe2336b77_subclass.jpg	40	9
+106	눈썹/네일관리	subclass/2020/4/9/48296cc5773d433b9e751febcaac9515_subclass.jpg	40	9
+107	손건조기/소독기	subclass/2020/4/9/cf2a1361ec774ffc96bbe22b32383501_subclass.jpg	40	9
+108	일반냉장고	subclass/2020/4/9/3cf01524279349c4bb3517eda93bc87f_subclass.jpg	41	9
+110	김치냉장고	subclass/2020/4/9/5f07a909c0824c729ed29c5edae62920_subclass.jpg	41	9
+109	미니냉장고	subclass/2020/4/9/c3d56bce27be4a988e032fcc1267d466_subclass.jpg	41	9
+111	냉동고	subclass/2020/4/9/c2617d5671834c54a761f10ef5771de8_subclass.jpg	41	9
+112	무기 및 총포탄 부품	subclass/2020/4/9/3989e7640fc84519b5221f030e3f6bb5_subclass.jpg	8	3
+113	경보기/스마트키	subclass/2020/4/9/f52bf8336040472ba9a22abc19fc3731_subclass.jpg	1	1
+114	차량용 음향기기	subclass/2020/4/9/37bcdd38d4cc4dbe9cbbcc72261c3c0c_subclass.jpg	1	1
+115	차량용 거치대	subclass/2020/4/9/cbc2f27d75a2451ab1dbbd40d8e15a6b_subclass.jpg	1	1
+116	차량용 충전기	subclass/2020/4/9/6b394223712a406ab757b5061deff20a_subclass.jpg	1	1
+117	금속파스너 및 스프링	subclass/2020/4/9/db14e6c7805140b4926ec7ad7df2921c_subclass.jpg	8	3
+118	금속단조제품	subclass/2020/4/9/15cb1fa41eee43d783b14fa83c1ac078_subclass.jpg	8	3
+119	유압기기	subclass/2020/4/9/4646f0a98a2e4a299cd24a4f7ddfae1b_subclass.jpg	51	3
+120	펌프	subclass/2020/4/9/2024d55284f345709e897af4a6004089_subclass.jpg	51	3
+121	압축기	subclass/2020/4/9/04d973afb44d4802991aba84459f883e_subclass.jpg	51	3
+122	베어링	subclass/2020/4/9/eadd352e4fc84efc8153564ca5d7aacc_subclass.jpg	51	3
+123	기어 및 동력전달장치	subclass/2020/4/9/ca0eb93ebfc14cef96daa035e54eba4a_subclass.jpg	51	3
+124	전동기	subclass/2020/4/9/20b8c495192c4d6192341b1114dc98d0_subclass.jpg	52	3
+125	변압기	subclass/2020/4/9/e6ded2b614e04835a4d0e1f5b67b04a9_subclass.jpg	52	3
+126	축전지	subclass/2020/4/9/81b0d669bd1848d49081a354156588bf_subclass.jpg	52	3
+127	광섬유케이블	subclass/2020/4/9/fc2f6d3f506e4c1fbd018f0a20a8ba89_subclass.jpg	52	3
+129	전자직접회로	subclass/2020/4/9/ee8a8b2c3b8c4178955ed8551d7a78da_subclass.jpg	53	3
+130	방송통신장비 및 부품	subclass/2020/4/9/25120ceae01b413b89c0b7d92761ce8c_subclass.jpg	53	3
+131	평판디스플레이(LCD, OLED 등)	subclass/2020/4/9/8be9c9d302ac44f19752dabab412efa8_subclass.jpg	53	3
+132	컴퓨터 주변기기(기억장치 등)	subclass/2020/4/9/fa86944160564068888acc70693e50eb_subclass.jpg	53	3
+144	공기청정기	subclass/2020/3/31/17094416c6374ccc80052803412566f8_subclass.jpg	36	9
+10	전기밥솥	subclass/2020/4/9/78adca5ec5744f49892c9fe7f234f210_subclass.jpg	18	5
+23	전기그릴/팬	subclass/2020/4/9/10ae1b3f2983403c918a969681898789_subclass.jpg	18	5
+145	수유/이유용품	subclass/2020/4/9/dd7f3340cdb14baf82ae7d771b2898d8_subclass.jpg	24	7
+69	선풍기	subclass/2020/4/9/43c17973acd646ee9c9c642eff7cbd38_subclass.jpg	36	9
+74	건조기/탈수기	subclass/2020/4/9/c45541f96ef74c608ac42528aa5ccf83_subclass.jpg	36	9
+128	가정용 전자기기 부품	subclass/2020/4/9/4335c3dd8e134178ad48bdde5022e75d_subclass.jpg	52	3
+133	광학렌즈	subclass/2020/4/9/09bf81a193884975905a6053a18b91ad_subclass.jpg	54	3
+134	시계부품	subclass/2020/4/9/e6e3b7a9a2164f309c11ceb80dd7c166_subclass.jpg	54	3
+135	기타의료기기 부품	subclass/2020/4/9/f97bc3f5e2ef48c1a2442aad8b469099_subclass.jpg	54	3
+136	측정기기 부품	subclass/2020/4/9/02f5457493534944b6aa859b916be2bd_subclass.jpg	54	3
+137	차량용/항공기용 엔진	subclass/2020/4/9/1f0bd80651a3470e990b68f4c33c9dcf_subclass.jpg	55	3
+138	자동차용 동력전달장치	subclass/2020/4/9/b4ecf3b380f54db286181e3a6a31d719_subclass.jpg	55	3
+139	자동차 차체 부품	subclass/2020/4/9/723ef0e144854056a7b430efae96ccab_subclass.jpg	55	3
+140	항공기 부품	subclass/2020/4/9/a1ae8b38ec2a4a66812f69d61fe8fd5f_subclass.jpg	55	3
+141	철도차량부품	subclass/2020/4/9/e1cf71787c214864a0ca6e123a909b4d_subclass.jpg	55	3
+142	선박 구성부품	subclass/2020/4/9/54be6f1eea7640ca8fe84f174d06ab5c_subclass.jpg	55	3
+147	마스크/방한대	subclass/2020/4/9/e68262538a2b4fe49a1621b183d8cc72_subclass.jpg	9	4
+148	보호대/교정용품	subclass/2020/4/9/f79438560c324fd0b28857ba43421db2_subclass.jpg	10	4
+149	건강측정용품	subclass/2020/4/9/86b4a48a74dd4f8e822669b8cec67625_subclass.jpg	11	4
+150	지압/마사지용품	subclass/2020/4/9/389620b65aea48538a621fef68cf7e6f_subclass.jpg	12	4
+151	호흡/수면건강	subclass/2020/4/9/321faf25268a432d81d63465d02b5d59_subclass.jpg	13	4
+152	활동보조용품	subclass/2020/4/9/eb30655478be47b89585838e5dfb7a61_subclass.jpg	14	4
+153	건강액세서리	subclass/2020/4/9/868d5b1693644813a46eecc509e843d7_subclass.jpg	15	4
+154	가정의료용품	subclass/2020/4/9/58987485aa0b4f9cb46d1f5b34dc5907_subclass.jpg	16	4
+155	전문의료용품	subclass/2020/4/9/e5e75bf65e6e4f868a8ddc02e6b05a82_subclass.jpg	17	4
+156	컵/잔/텀블러	subclass/2020/4/9/7f39f4a20fb24a43a7f724eff2233a29_subclass.jpg	57	5
+157	그릇/홈세트	subclass/2020/4/9/928633b6fab94ffa94a23299ea8ca585_subclass.jpg	56	5
+158	밀폐저장/도시락	subclass/2020/4/9/accff14d7ca448bd8f89778c621e01da_subclass.jpg	58	5
+159	보온/보냉용품	subclass/2020/4/9/b285d48e58544fee8ea1defeeba9eff9_subclass.jpg	59	5
+160	이유/유아식기	subclass/2020/4/9/3cc716486db34fbcaa5a1745269e70a1_subclass.jpg	60	5
+161	주방수납/정리	subclass/2020/4/9/7fa99ae8b26d40e98c62660c837c4578_subclass.jpg	61	5
+162	주방조리도구	subclass/2020/4/9/9c44441d3a614e4d96192496064ac2de_subclass.jpg	62	5
+163	주방잡화	subclass/2020/4/9/1c5c634958ea49e4bc5526306c25bd6b_subclass.jpg	65	5
+164	베이킹용품	subclass/2020/4/9/250eba2a737e4e8eaf7d23385979dbed_subclass.jpg	63	5
+165	캠핑주방용품	subclass/2020/4/9/a8e3be3148414d9cb8a5d99bb4e3dacb_subclass.jpg	64	5

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="EUC-KR">
+        <title>비즈뿌리오 API 확인하기</title>
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+        <script type="text/javascript">
+            $(function() {
+			          $(".checkBtn").on("click", function() {
+				            $.ajax({
+                        type: "POST",
+                        // type: "GET",
+                        url: 'https://api.bizppurio.com/v3/message',
+                        data: {
+                            'account': 'boltnnut_korea',
+                            'refkey': 'bolt123',
+                            'type': 'at', 
+                            'from': '01028741248',
+                            'to': '01041376379',
+                            'content': {
+                                'at': {
+                                'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'send_message_after_week',
+                                'message': "안녕하세요 태준님.\n\n요청하신 requestTitle 상담에 문의 사항은 충분히 해결되셨나요?\n\n제조사와의 소통 과정을 통해 충분히 해소되지 않았다면 볼트앤너트 전문 컨설턴트에게 상담을 요청해보세요.\n\n컨설턴트께서 문의 사항을 확인하고 적합한 답변을 드릴 수 있습니다.",
+                                'button': [
+                                        {
+                                        'name': '상담하기',
+                                        'type': 'WL',
+                                        'url_mobile': 'https://www.boltnnut.com/',
+                                    }
+                                ]
+                            }
+                        }
+                            // 'id': 53
+                          },
+                          dataType: "json"
+                        })
+				          .done(function() {
+				            	alert("요청 성공");
+				          })
+				          .fail(function() {
+				            	alert("요청 실패");
+				          })
+				          .always(function() {
+				            	alert("요청 완료");
+                      // console.log('되냐?')
+				          });
+	              });
+		        });
+        </script>
+    </head>
+    <body>
+        <!-- <h1>Testing page</h1> -->
+        <div>
+            <div>
+                카톡 보내기
+            </div>
+        </div>
+        <div class="send_kakao">
+            <button class="checkBtn">확인하기</button>
+        </div>
+        <div class="left_body">
+        </div>
+    </body>
+</html>

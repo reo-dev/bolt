@@ -1,0 +1,65 @@
+3	자동차 관리용품	category/2020/3/20/b3e45b78bd6f4e0ca1a326d15f38e8d8_category.jpg	1
+4	자동차 실내용품	category/2020/3/20/1749c43ca89d49088a69c10c0c6c99fd_category.jpg	1
+5	타이어 실외용품	category/2020/3/20/23bf2da20cf04ce0a982275a26efce6d_category.jpg	1
+20	욕실용품	category/2020/3/20/b0a203daa20f4004b36c41c4484c9c6b_category.jpg	6
+25	외출용품	category/2020/3/20/a60f56b3ab724621ad61ec01923d0e23_category.jpg	7
+27	완구/교구	category/2020/3/20/c77f337cfb9546a8bda9d579de48d4cf_category.jpg	7
+28	유아동잡화	category/2020/3/20/58e197387c744da880d7d029931086a1_category.jpg	7
+29	임부/태교용품	category/2020/3/20/120106bb3ba04e5c98449fadad807aaa_category.jpg	7
+30	인테리어소품	category/2020/3/20/0fc0a98aa5594d1f95303d37ebca626f_category.jpg	8
+31	조명/스탠드	category/2020/3/20/13bc3a6d789144e28609aeeb00af4a00_category.jpg	8
+42	스포츠잡화	category/2020/3/20/7aada06e29c24f6283131faa154e7fca_category.jpg	10
+43	캠핑용품	category/2020/3/20/4bef615424d24cf9954acb157b6862a7_category.jpg	10
+47	자전거/킥보드/인라인	category/2020/3/20/41da773fe0de475e81766f8be1259af1_category.jpg	10
+48	헬스용품	category/2020/3/20/41c08ecc1d3b429692d41a7cf1821d48_category.jpg	10
+17	전문의료용품	category/2020/4/9/eda7398a001e469388e1debddef0c2e9_category.jpg	4
+16	가정의료용품	category/2020/4/9/7f1a35fb5cf74331b4b8fa9ed2fdf3f5_category.jpg	4
+9	마스크/방한대	category/2020/4/9/0bae190d07f340618f5997cc46da906a_category.jpg	4
+10	보호대/교정용품	category/2020/4/9/79c1c358f80c4e8eabad40cde72f6de0_category.jpg	4
+11	건강측정용품	category/2020/4/9/b4b84a05b614461780b9e234108d4561_category.jpg	4
+12	지압/마사지용품	category/2020/4/9/b7346235cc5242bb8167d9263d7bce29_category.jpg	4
+18	주방가전	category/2020/4/9/f7bb5dbfbfb74f3581411e5e892e199d_category.jpg	5
+56	그릇/홈세트	category/2020/4/9/7919e1789dfb4a68a584034bdab693f2_category.jpg	5
+58	밀폐저장/도시락	category/2020/4/9/06bfed1c7fc8428c9fd16fb1aff36683_category.jpg	5
+59	보온/보냉용품	category/2020/4/9/5230820d425e4041b290b3a072f46f67_category.jpg	5
+60	이유/유아식기	category/2020/4/9/471ba67dcdf4449faa7760fa765da27e_category.jpg	5
+61	주방수납/정리	category/2020/4/9/b3706f7a601341b78972bc6a6cb2a30b_category.jpg	5
+65	주방잡화	category/2020/4/9/9b2f4513e3744de091efd33130b3385f_category.jpg	5
+63	베이킹용품	category/2020/4/9/172009449fe3404cbc997d2bc8183955_category.jpg	5
+19	방한용품	category/2020/4/9/1fa872f52e394d4f8bf9aea26ad3804f_category.jpg	6
+21	수납/정리	category/2020/4/9/756d11a97cbd4b1ab11164d32ef8b715_category.jpg	6
+22	생활잡화	category/2020/4/9/194232edfe0c405e937852299c39489d_category.jpg	6
+23	공구/철물/DIY용품	category/2020/4/9/fbd981d3bbea4ea4a5db5c45f42ef56f_category.jpg	6
+24	수유/이유용품	category/2020/4/9/f06129aa1b7a460d88aa1ea6f158bc6c_category.jpg	7
+26	안전/실내용품	category/2020/4/9/63287e6ad56b4266ae73ddc31b1938b4_category.jpg	7
+32	컴퓨터	category/2020/4/9/e7e3ad2ece2648afb7e54bd525e14435_category.jpg	9
+33	휴대폰/엑세서리	category/2020/4/9/36106ec44b3c431d86390dca3ca070d7_category.jpg	9
+34	음향기기	category/2020/4/9/c78ddaebfc0e4f5b8b01f28ba71f2f77_category.jpg	9
+35	카메라	category/2020/4/9/9831edd2a51c4c96929397aa76e645f6_category.jpg	9
+36	계절가전	category/2020/4/9/db9870315d234b0196879547644ed852_category.jpg	9
+37	TV/영상가전	category/2020/4/9/4b5e17a7e79f42de852717d94efa6689_category.jpg	9
+38	청소기	category/2020/4/9/476792a4d79e432e998ff4d1b7761840_category.jpg	9
+39	세탁기/생활가전	category/2020/4/9/443b79851a0c463894b5b5c36356c885_category.jpg	9
+40	미용가전	category/2020/4/9/8d4af6bb80ff457d8f3bf8eea36d371e_category.jpg	9
+41	냉장고	category/2020/4/9/45fbfb01c9c34a04b968f689e54e53b3_category.jpg	9
+45	골프	category/2020/4/9/4fd3437747084173a1d1b654b86a3594_category.jpg	10
+46	수영/수상레포츠	category/2020/4/9/18b05707816648b2861aa94489144784_category.jpg	10
+49	스키/보드/빙상	category/2020/4/9/ab695fd439fa42199a5fc0a36357835f_category.jpg	10
+50	구기/라켓/기타스포츠	category/2020/4/9/16dafd7a9ff54c0ea226cd3bd24e44ad_category.jpg	10
+1	차량용 디지털	category/2020/4/9/05df1b306705466e8ac9ea826e244cec_category.jpg	1
+6	강아지 용품	category/2020/4/9/3b824547e2454a809d5c9a0ed2aa4054_category.jpg	2
+2	고양이 용품	category/2020/4/9/b007d24fcd614a6caab0ece41d2c28b0_category.jpg	2
+7	관상어/소동물	category/2020/4/9/fe81edd9f94b4de1946410263e1be716_category.jpg	2
+8	금속가공제품	category/2020/4/9/618f18f67ac249c7989238ae1344653a_category.jpg	3
+51	일반기계 및 부품	category/2020/4/9/5f9552d28d2e4ac58f20483c3b67c90c_category.jpg	3
+52	전자장비 및 부품	category/2020/4/9/47d0f4a8d5cb4dc7a9981a9d0cf9d32f_category.jpg	3
+53	전자부품	category/2020/4/9/b39d1814eca9434c816c5dad7402fe55_category.jpg	3
+54	정밀기기부품	category/2020/4/9/3d0cac66fa11401c8125c90b1282c199_category.jpg	3
+55	수송기계부품	category/2020/4/9/a2899d43ca4c4f7d9891d98c7c934be6_category.jpg	3
+13	호흡/수면건강	category/2020/4/9/52d7427c5c754995bc32e1d2b2036a78_category.jpg	4
+14	활동보조용품	category/2020/4/9/1008c32de463464980cf5135908a3fd9_category.jpg	4
+15	건강액세서리	category/2020/4/9/fec27281904947948a63a13c049a109f_category.jpg	4
+57	컵/잔/텀블러	category/2020/4/9/30a98248b1cc47ba8f3881d769908d9f_category.jpg	5
+62	주방조리도구	category/2020/4/9/4827d5c96ff646b8924e557f6c3ac04b_category.jpg	5
+64	캠핑주방용품	category/2020/4/9/cf653459e8704acba97e21d819661032_category.jpg	5
+44	등산/아웃도어용품	category/2020/4/9/de579496d88f4953a8951445418aa311_category.jpg	10

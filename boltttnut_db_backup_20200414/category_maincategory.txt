@@ -1,0 +1,10 @@
+9	가전/디지털	maincategory/2020/3/20/83371ab2ff994687ae43c517e5a9d104_maincategory.jpg
+4	의료용품	maincategory/2020/4/9/0fd40a088640427a94f70d1f70015225_maincategory.jpg
+5	주방용품	maincategory/2020/4/9/125f7d6aff074c42b6f898c3d3a4f28a_maincategory.jpg
+6	생활용품	maincategory/2020/4/9/64f6c418b7004867b09604b4b1e7eac8_maincategory.jpg
+7	유아용품	maincategory/2020/4/9/a400d66bc35943d3b8c82d8332bdadfc_maincategory.jpg
+8	홈/데코	maincategory/2020/4/9/ca7b97d951f742e49d5bcb323f6ba873_maincategory.jpg
+10	스포츠	maincategory/2020/4/9/5d4f014e3c1945c6865920c17cdf5ae6_maincategory.jpg
+1	자동차용품	maincategory/2020/4/9/8e9615b19c0349e594c8d5d31ba1a964_maincategory.jpg
+2	반려동물용품	maincategory/2020/4/9/e824497b916546f7b45b94758d88ef69_maincategory.jpg
+3	산업장비 및 부품	maincategory/2020/4/9/38e03d178f0e4752b5037f6e41c7e418_maincategory.jpg

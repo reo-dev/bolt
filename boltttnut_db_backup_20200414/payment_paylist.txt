@@ -1,0 +1,35 @@
+1	1	name	1	1	status	0	0	17
+2	2	name	pc	card	paid	0	0	17
+3	1	name	1	1	status	0	0	17
+4	1	name	1	1	status	0	0	17
+5	1	name	1	1	status	0	0	17
+6	1	name	1	1	status	0	0	17
+7	1	name	1	1	status	0	0	17
+8	1	name	1	1	status	0	0	17
+9	1	name	1	1	status	0	0	17
+10	1	name	1	1	status	0	0	17
+11	1	name	1	1	status	0	0	17
+12	1	name	1	1	status	0	0	17
+13	1	name	1	1	status	0	0	17
+14	1	name	1	1	status	0	0	17
+15	1	name	1	1	status	0	0	17
+16	1	name	1	1	status	0	0	17
+17	1	name	1	1	status	0	0	17
+18	1	name	1	1	status	0	0	17
+19	1	name	1	1	status	0	0	17
+20	1	name	1	1	status	0	0	17
+21	1	name	1	1	status	0	0	17
+22	boltnnut__AJYVC__0000000022	1	1	1		1	1	23
+23	boltnnut__7ZDGX__0000000022	1	1	1	0	1	1	23
+24	boltnnut__BYRI2__0000000022	1	0	0	0	1	1	23
+25	boltnnut__Q9Z7C__0000000022	1	pre	pre	0	1	1	23
+26	boltnnut__HZFA0__0000000022	1	0	0	0	1	1	23
+27	boltnnut__IV9FJ__0000000022	1	0	0	0	1	1	23
+28	boltnnut__DAFV4__0000000022	1	0	0	0	1	1	23
+29	boltnnut__NSWIB__0000000022	1	0	0	0	1	1	23
+30	boltnnut__0W0FB__0000000022	1	0	0	0	1	1	23
+32	boltnnut__FPTO4__0000000018	볼트앤너트 1 코인	0	0	0	1000	1	18
+31	boltnnut__5ULZP__0000000018	볼트앤너트 1 코인	pc	card	paid	1000	1	18
+33	boltnnut__Q32IH__0000000018	볼트앤너트 1 코인	0	0	0	1000	1	18
+34	boltnnut__37667__0000000018	볼트앤너트 1 코인	mobile	card	paid	1000	1	18
+35	boltnnut__XYB95__0000000018	볼트앤너트 1 코인	mobile	card	paid	1000	1	18

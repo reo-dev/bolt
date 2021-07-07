@@ -1,0 +1,36 @@
+# Created by https://www.gitignore.io/api/django,elasticbeanstalk
+# Edit at https://www.gitignore.io/?templates=django,elasticbeanstalk
+
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+#db.sqlite3
+#media
+venvs
+
+### ElasticBeanstalk ###
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml 
+!.elasticbeanstalk/*.global.yml
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+#.env
+.env
+#pem, ppk
+*.pem
+*.ppk
+
+#tar
+*.tar
+
+#uwsgi
+boltnnut-platform-staging-uwsgi.ini
+uwsgi_param
+
+DumpAndRestore.sh
+testDB.tar

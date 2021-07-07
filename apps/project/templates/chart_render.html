@@ -1,0 +1,610 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.18/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script>
+        function string_to_utf8_bytes(text){
+            var result = [] ;
+            if (text == null )
+                return result;
+            for ( var i = 0; i<text.length; i ++) {
+                var c = text.charCodeAt (i);
+                if (c <= 0x7f) {
+                    result.push (c);
+                }
+                else if (c <= 0x07ff) {
+                    result.push (((c >> 6) & 0x1F) | 0xC0);
+                    result.push ((c & 0x3F) | 0x80);
+                }
+                else {
+                    result.push (((c >> 12) & 0x0F) | 0xE0);
+                    result.push (((c >> 6) & 0x3F) | 0x80);
+                    result.push ((c & 0x3F) | 0x80);
+                }
+
+            }
+            return result;
+        }
+    </script>
+    <script>
+        function bytes_to_hex_string(bytes){
+            var result = "" ;
+            for ( var i=0; i<bytes.length; i++) {
+                result += byte_to_hex (bytes[i]);
+            }
+            return result;
+        }
+    </script>
+    <script>
+        function byte_to_hex(byte_num){
+            var digits = (byte_num).toString (16);
+            if (byte_num <16)
+                return '0' + digits;
+            return digits;
+        }
+    </script>
+
+
+    <script>
+        var getQuerystring = function(){
+            querystring = location.search
+            if(querystring){
+                querystring = querystring.split('?')[1]
+            }
+            var tmp = querystring.split('&')
+            var obj = [];
+            for(var i=0; i<tmp.length; i++){
+                var pair = tmp[i].split('=')
+                obj.push([pair[0], pair[1]])
+            }
+            return obj;
+        }
+    </script>
+
+    <script>
+        let setCheckbox = function(){
+            let pattern_english = /[a-zA-Z]/;
+            let pattern_num = /[0-9]/;
+
+            resetCheckbox();
+            //get querystring array
+            let obj = getQuerystring();
+            //loop querystring length
+            for(let i=0; i<obj.length; i++){
+                let elementName = obj[i][0]+'Box';
+                //serach querystring === checkbox 
+                for(let j=1; j<document.getElementsByName(elementName).length; j++){
+                    let querystring;
+                    let elementvalue = '';
+                    let check_box_value = document.getElementsByName(elementName)[j].value;
+                    //loop checkbox value length
+                    for(let k=0; k<check_box_value.length; k++){
+                        //enlish, number
+                        if(pattern_english.test(check_box_value[k]) || pattern_num.test(check_box_value[k])){
+                            elementvalue = elementvalue.concat(check_box_value[k]);
+                        }
+                        //blank
+                        else if(check_box_value[k]===' '){
+                            continue;
+                        }
+                        //korea and symbol
+                        else{
+                            let byte = string_to_utf8_bytes(check_box_value[k]);
+                            elementvalue = elementvalue.concat(bytes_to_hex_string(byte));
+                        }
+                    }
+                    //lowercase
+                    elementvalue = elementvalue.toLowerCase();
+                    querystring = obj[i][1].replaceAll('%', '').replaceAll('+', '').toLowerCase();
+                    if(querystring === elementvalue){
+                        document.getElementsByName(elementName)[j].checked = true;
+                        document.getElementsByName(elementName)[0].checked = false;
+                    }
+                }
+            }
+
+        }
+    </script>
+    <script>
+        var setCreated_at = function(){
+            var obj = getQuerystring();
+            for(var i=0; i<obj.length; i++){
+                var elementName = obj[i][0];
+                if(elementName === 'requestGte'){
+                    document.getElementById('requestGte').value = obj[i][1];
+                }
+                if(elementName === 'requestLte'){
+                    document.getElementById('requestLte').value = obj[i][1];
+                }
+                if(elementName === 'estimateGte'){
+                    document.getElementById('estimateGte').value = obj[i][1];
+                }
+                if(elementName === 'estimateLte'){
+                    document.getElementById('estimateLte').value = obj[i][1];
+                }
+                if(elementName === 'maincategoryGte'){
+                    document.getElementById('maincategoryGte').value = obj[i][1];
+                }if(elementName === 'maincategoryLte'){
+                    document.getElementById('maincategoryLte').value = obj[i][1];
+                }
+            }
+        }
+    </script>
+    <script>
+        var resetCheckbox = function(){
+            for(var j=0; j<document.getElementsByClassName('all').length ;j++){
+                    document.getElementsByClassName('all')[j].checked = true;
+            }
+        }
+
+    </script>
+
+    <script>
+        var ChangeQuerystring = function (key, value){
+            qs = location.search
+            var params = new URLSearchParams(qs);
+
+            if(value === ''){
+                params.delete(key);
+            }
+            else{
+                params.set(key, value);
+            }
+            window.location.search = params;
+        }
+    </script>
+    <script>
+        var ChangeQuerystring_created_at = function (){
+            var requestGte = document.getElementById('requestGte').value
+            var requestLte = document.getElementById('requestLte').value
+            var estimateGte = document.getElementById('estimateGte').value
+            var estimateLte = document.getElementById('estimateLte').value
+            var maincategoryGte = document.getElementById('maincategoryGte').value
+            var maincategoryLte = document.getElementById('maincategoryLte').value
+
+            qs = location.search
+            var params = new URLSearchParams(qs);
+            //request
+            if(requestGte === ''){
+                params.delete('requestGte');
+            }
+            else{
+                params.set('requestGte', requestGte);
+            }
+            if(requestLte === ''){
+                params.delete('requestLte');
+            }
+            else{
+                params.set('requestLte', requestLte);
+            }
+            //estimate
+            if(estimateGte === ''){
+                params.delete('estimateGte');
+            }
+            else{
+                params.set('estimateGte', estimateGte);
+            }
+            if(estimateLte === ''){
+                params.delete('estimateLte');
+            }
+            else{
+                params.set('estimateLte', estimateLte);
+            }
+
+
+            //maincategory
+            if(maincategoryGte === ''){
+                params.delete('maincategoryGte');
+            }
+            else{
+                params.set('maincategoryGte', maincategoryGte);
+            }
+            if(maincategoryLte === ''){
+                params.delete('maincategoryLte');
+            }
+            else{
+                params.set('maincategoryLte', maincategoryLte);
+            }
+
+
+            window.location.search = params;
+        }
+    </script>
+
+    <script>
+        var ResetQuerystring_created_at = function (){
+
+            qs = location.search
+            var params = new URLSearchParams(qs);
+            params.delete('requestGte');
+            params.delete('requestLte');
+            params.delete('estimateGte');
+            params.delete('estimateLte');
+            params.delete('maincategoryGte');
+            params.delete('maincategoryLte');
+            
+            window.location.search = params;
+        }
+    </script>
+    <script>
+        $(function() {
+            $( "#requestGte" ).datepicker({
+                showButtonPanel: true,
+                currentText: 'Today',
+                closeText: 'close',
+                dateFormat: "yy-mm-dd"
+            });
+        });
+        $(function() {
+            $( "#requestLte" ).datepicker({
+                showButtonPanel: true,
+                currentText: 'Today',
+                closeText: 'close',
+                dateFormat: "yy-mm-dd"
+            });
+        });
+        
+        $(function() {
+            $( "#estimateGte" ).datepicker({
+                showButtonPanel: true,
+                currentText: 'Today',
+                closeText: 'close',
+                dateFormat: "yy-mm-dd"
+            });
+        });
+        $(function() {
+            $( "#estimateLte" ).datepicker({
+                showButtonPanel: true,
+                currentText: 'Today',
+                closeText: 'close',
+                dateFormat: "yy-mm-dd"
+            });
+        });
+
+
+        $(function() {
+            $( "#maincategoryGte" ).datepicker({
+                showButtonPanel: true,
+                currentText: 'Today',
+                closeText: 'close',
+                dateFormat: "yy-mm-dd"
+            });
+        });
+        $(function() {
+            $( "#maincategoryLte" ).datepicker({
+                showButtonPanel: true,
+                currentText: 'Today',
+                closeText: 'close',
+                dateFormat: "yy-mm-dd"
+            });
+        });
+
+    </script>
+    <script>
+        var drawPieChart = function(data, id) {
+            var canvas = document.getElementById(id);
+            var ctx = canvas.getContext('2d');
+            var x = canvas.width/2.5;
+                y = canvas.height/2.5;
+            var color,
+                startAngle,
+                endAngle,
+                total = getTotal(data);
+
+            for(var i=0; i<data.length; i++) {
+                color = randomColorGenerator();
+                startAngle = calculateStart(data, i, total);
+                endAngle = calculateEnd(data, i, total);
+
+                ctx.beginPath();
+                ctx.fillStyle = color;
+                ctx.moveTo(x, y);
+                ctx.arc(x, y, y-75, startAngle, endAngle);
+                ctx.fill();
+                ctx.rect(canvas.width/1.6, y - i * 20, 12, 12);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.font = "12px sans-serif";
+                ctx.fillText(data[i].label + " - " + data[i].value + " (" + calculatePercent(data[i].value, total) + "%)", canvas.width/1.6 + 20, y - i * 20 + 10);
+            }
+        };
+
+        var calculatePercent = function(value, total) {
+            return (value / total * 100).toFixed(2);
+        };
+
+        var getTotal = function(data) {
+            var sum = 0;
+            for(var i=0; i<data.length; i++) {
+                sum += data[i].value;
+            }
+            return sum;
+        };
+
+        var calculateStart = function(data, index, total) {
+            if(index === 0) {
+                return 0;
+            }
+
+            return calculateEnd(data, index-1, total);
+        };
+
+        var calculateEndAngle = function(data, index, total) {
+            var angle = data[index].value / total * 360;
+            var inc = ( index === 0 ) ? 0 : calculateEndAngle(data, index-1, total);
+
+            return ( angle + inc );
+        };
+
+        var calculateEnd = function(data, index, total) {
+            return degreeToRadians(calculateEndAngle(data, index, total));
+        };
+
+        var degreeToRadians = function(angle) {
+            return angle * Math.PI / 180
+        }
+        var randomColorGenerator = function () {
+            return '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
+        };
+    </script>
+    <script>
+        var pathData = [
+            {% for idx in clientPath %}
+                { label: '{{idx.path}}', value: {{idx.path_count}} },
+            {% endfor %}
+        ];
+        var titleData = [
+            {% for idx in clientTitle %}
+                { label: '{{idx.title}}', value: {{idx.title_count}} },
+            {% endfor %}
+        ];
+        var businessData = [
+            {% for idx in clientBusiness %}
+                { label: '{{idx.business}}', value: {{idx.business_count}} },
+            {% endfor %}
+        ];
+
+
+
+        var requestPathData = [
+            {% for idx in requestClientPath %}
+                { label: '{{idx.path}}', value: {{idx.path_count}} },
+            {% endfor %}
+        ];
+        var requestTitleData = [
+            {% for idx in requestClientTitle %}
+                { label: '{{idx.title}}', value: {{idx.title_count}} },
+            {% endfor %}
+        ];
+        var requestBusinessData = [
+            {% for idx in requestClientBusiness %}
+                { label: '{{idx.business}}', value: {{idx.business_count}} },
+            {% endfor %}
+        ];
+
+
+
+        var progressStatusData = [
+            {% for idx in progressStatus %}
+                { label: '{{idx.progress_status}}', value: {{idx.progress_status_count}} },
+            {% endfor %}
+        ];
+        {% regroup requestObj by created_at|date:"Y-m-d" as created_at_list %}
+        var created_at_data = [
+            {% for idx in created_at_list %}
+                { label: '{{idx.grouper}}', value: {{idx.list|length}} },
+            {% endfor %}
+        ];
+
+
+
+        window.onload = function(){
+            setCheckbox();
+            setCreated_at();
+            drawPieChart(pathData, 'pathChart');
+            drawPieChart(titleData, 'titleChart');
+            drawPieChart(businessData, 'businessChart');
+
+            drawPieChart(requestPathData, 'requestPathChart');
+            drawPieChart(requestTitleData, 'requestTitleChart');
+            drawPieChart(requestBusinessData, 'requestBusinessChart');
+
+            drawPieChart(progressStatusData, 'progressStatusChart');
+            drawPieChart(created_at_data, 'created_at_chart');
+        }
+    </script>
+    <script type="text/javascript">
+      google.charts.load("current", {packages:['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ["Element", "Density", { role: "style" } ],
+          ["{{estimateList.progress0}}", {{estimateList.progress0Sum}}, "#FAF500"],
+          ["{{estimateList.progress1}}", {{estimateList.progress1Sum}}, "#F011E5"],
+          ["{{estimateList.progress2}}", {{estimateList.progress2Sum}}, "#0446D9"],
+          ["{{estimateList.progress3}}", {{estimateList.progress3Sum}}, "#05FC5B"]
+        ]);
+  
+        var view = new google.visualization.DataView(data);
+        view.setColumns([0, 1,
+                         { calc: "stringify",
+                           sourceColumn: 1,
+                           type: "string",
+                           role: "annotation" },
+                         2]);
+  
+        var options = {
+          title: "Estimate",
+          width: 600,
+          height: 400,
+          bar: {groupWidth: "95%"},
+          legend: { position: "none" },
+        };
+        var chart = new google.visualization.ColumnChart(document.getElementById("columnchart_values"));
+        chart.draw(view, options);
+      }
+    </script>
+
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+            ['category', 'count'],
+            {% for idx in maincategoryList %}
+                ['{{idx.maincategory}} : {{idx.count}} ({{idx.percentage}}%)', {{idx.count}}],
+            {% endfor %}
+        ]);
+
+        var options = {
+            title: 'total : {{maincategoryLength}}'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('test'));
+
+        chart.draw(data, options);
+        }
+    </script>
+
+
+{% endblock %}
+
+{% block content %}
+    <!-- --------Client-------- -->
+    {% regroup originClientPath by path as pahtList %}
+    {% regroup originClientTitle by title as titleList %}
+    {% regroup originClientBusiness by business as businessList %}
+    <h1> Client </h1>
+    path :
+    <input type="checkbox" name="pathBox" class='all' onclick="ChangeQuerystring('path', '')" value=All> All &nbsp;</>
+    {% for idx in pahtList %}
+        <input type="checkbox" name="pathBox" onclick="ChangeQuerystring('path', '{{ idx.grouper }}')" value="{{ idx.grouper }}"> {{ idx.grouper }} &nbsp;</>
+    {% endfor %}
+    <br/><br/>
+
+    title :
+    <input type="checkbox" name="titleBox" class='all' onclick="ChangeQuerystring('title', '')" value=All> All &nbsp;</>
+    {% for idx in titleList %}
+        <input type="checkbox" name="titleBox" onclick="ChangeQuerystring('title', '{{ idx.grouper }}')" value="{{ idx.grouper }}">{{ idx.grouper }}</>
+    {% endfor %}
+    <br/><br/>
+
+    business :
+    <input type="checkbox" name="businessBox" class='all' onclick="ChangeQuerystring('business', '')" value=All> All &nbsp;</>
+    {% for idx in businessList %}
+        <input type="checkbox" name="businessBox" onclick="ChangeQuerystring('business', '{{ idx.grouper }}')" value="{{ idx.grouper }}">{{ idx.grouper }}</>
+    {% endfor %}
+    <br/><br/>
+
+    <div class="row">
+        <canvas id="pathChart" width="480px" height="400"></canvas>
+        <canvas id="titleChart" width="480px" height="400"></canvas>
+        <canvas id="businessChart" width="480px" height="400"></canvas>
+    </div>
+
+    <hr/>
+
+    <!-- --------requestClient-------- -->
+    {% regroup originRequestClientPath by path as requestPathList %}
+    {% regroup originRequestClientTitle by title as requestTitleList %}
+    {% regroup originRequestClientBusiness by business as requestBusinessList %}
+    <h1> Request-Client </h1>
+    path :
+    <input type="checkbox" name="requestPathBox" class='all' onclick="ChangeQuerystring('requestPath', '')" value=All> All &nbsp;</>
+    {% for idx in requestPathList %}
+        <input type="checkbox" name="requestPathBox" onclick="ChangeQuerystring('requestPath', '{{ idx.grouper }}')" value="{{ idx.grouper }}"> {{ idx.grouper }} &nbsp;</>
+    {% endfor %}
+    <br/><br/>
+
+    title :
+    <input type="checkbox" name="requestTitleBox" class='all' onclick="ChangeQuerystring('requestTitle', '')" value=All> All &nbsp;</>
+    {% for idx in requestTitleList %}
+        <input type="checkbox" name="requestTitleBox" onclick="ChangeQuerystring('requestTitle', '{{ idx.grouper }}')" value="{{ idx.grouper }}"> {{ idx.grouper }} &nbsp;</>
+    {% endfor %}
+    <br/><br/>
+
+    business :
+    <input type="checkbox" name="requestBusinessBox" class='all' onclick="ChangeQuerystring('requestBusiness', '')" value=All> All &nbsp;</>
+    {% for idx in requestBusinessList %}
+        <input type="checkbox" name="requestBusinessBox" onclick="ChangeQuerystring('requestBusiness', '{{ idx.grouper }}')" value="{{ idx.grouper }}">{{ idx.grouper }}</>
+    {% endfor %}
+    <br/><br/>
+
+    <div class="row">
+        <canvas id="requestPathChart" width="480px" height="400"></canvas>
+        <canvas id="requestTitleChart" width="480px" height="400"></canvas>
+        <canvas id="requestBusinessChart" width="480px" height="400"></canvas>
+    </div>
+
+    <hr/>
+    <!-- --------Request-------- -->
+    {% regroup originProgress by progress_status as progressStatusList %}
+    <h1> Request </h1>
+    progress status :
+    <input type="checkbox" name="progressStatusBox" class='all' onclick="ChangeQuerystring('progressStatus', '')" value=All> All &nbsp;</>
+    {% for idx in progressStatusList %}
+        <input type="checkbox" name="progressStatusBox" onclick="ChangeQuerystring('progressStatus', '{{ idx.grouper }}')" value="{{ idx.grouper }}">{{ idx.grouper }}</>
+    {% endfor %}
+    <br/><br/>
+
+    created_at :
+    <input type="text" id="requestGte" name="requestGte" placeholder="requestGte" class="char" maxlength="20" value="">
+    <input type="text" id="requestLte" name="requestLte" placeholder="requestLte" class="char" maxlength="20" value="">
+    <button onclick="ChangeQuerystring_created_at()">created-at-filter</button>
+    <button onclick="ResetQuerystring_created_at()">reset</button>
+
+    <br/><br/>
+    <div class="row">
+        <canvas id="progressStatusChart" width="480px" height="400"></canvas>
+        <canvas id="created_at_chart" width="480px" height="400"></canvas>
+    </div>
+  
+    <hr/>
+    <!-- --------Estimate-------- -->
+    <h1> Estimate </h1>
+    created_at :
+    <input type="text" id="estimateGte" name="estimateGte" placeholder="estimateGte" class="char" maxlength="20" value="">
+    <input type="text" id="estimateLte" name="estimateLte" placeholder="estimateLte" class="char" maxlength="20" value="">
+    <button onclick="ChangeQuerystring_created_at()">estimate-filter</button>
+    <button onclick="ResetQuerystring_created_at()">reset</button>
+    <div class="row">
+        <div id="columnchart_values" width="480px" height="400"></div>
+    </div>
+    <br/><br/>
+    
+
+
+    <hr/>
+    <!-- --------Maincategory-------- -->
+    <h1> Maincategory </h1>
+    created_at :
+    <input type="text" id="maincategoryGte" name="maincategoryGte" placeholder="maincategoryGte" class="char" maxlength="20" value="">
+    <input type="text" id="maincategoryLte" name="maincategoryLte" placeholder="maincategoryLte" class="char" maxlength="20" value="">
+    <button onclick="ChangeQuerystring_created_at()">maincategory-filter</button>
+    <button onclick="ResetQuerystring_created_at()">reset</button>
+    <br/><br/>
+    
+    Maincategory :
+    <input type="checkbox" name="maincategoryBox" class='all' onclick="ChangeQuerystring('maincategory', '')" value=All> All &nbsp;</>
+    {% for idx in originMaincategory %}
+        <input type="checkbox" name="maincategoryBox" onclick="ChangeQuerystring('maincategory', '{{ idx.maincategory }}')" value="{{ idx.maincategory }}">{{ idx.maincategory }}</>
+    {% endfor %}
+    
+    <br/><br/>
+    <div class="row">
+        <div id="test" style="width: 900px; height: 500px;"></div>
+    </div>
+    <br/><br/>
+
+
+{% endblock %}
+
+
