@@ -12,7 +12,29 @@ import requests
 import json
 import time
 from .project.models import *
-# from .project.cron import *
+from .account.models import *
+import sys
+
+from pathlib import Path
+from email.mime.image import MIMEImage
+from django.core.mail import EmailMultiAlternatives
+
+from PIL import Image
+import cv2
+import glob
+import imageio
+from io import BytesIO,StringIO
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import pandas as pd
+from pptx import Presentation
+import PyPDF2
+import chardet
+import unicodedata
+
+
+
+
 
 class ResponseCode(enum.Enum):
 
@@ -76,7 +98,7 @@ class Util():
         return str(result)
 
 class kakaotalk(object):
-# ºó ÀüÈ­¹øÈ£ / ÀÌ»óÇÑ ÀüÈ­¹øÈ£´Â ¿¡·¯¶å´Ï´Ù.
+# ë¹ˆ ì „í™”ë²ˆí˜¸ / ì´ìƒí•œ ì „í™”ë²ˆí˜¸ëŠ” ì—ëŸ¬ëœ¹ë‹ˆë‹¤.
         def send(phone_list, subject):
             # print(subject)
             # print(phone_list)
@@ -86,11 +108,11 @@ class kakaotalk(object):
             #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
             #          'to': phone, 'content': {
             #        'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'request_to_partner2',
-            #                 'message': 'ÆÄÆ®³Ê´Ô¿¡°Ô ÀûÇÕÇÑ ÀÇ·Ú¼­°¡ µµÂøÇß½À´Ï´Ù.\nÀÇ·Ú¼­¸í : ' + subject,
+            #                 'message': 'íŒŒíŠ¸ë„ˆë‹˜ì—ê²Œ ì í•©í•œ ì˜ë¢°ì„œê°€ ë„ì°©í–ˆìŠµë‹ˆë‹¤.\nì˜ë¢°ì„œëª… : ' + subject,
 
             #               'button': [
             #                     {
-            #                      'name': 'È®ÀÎÇÏ·¯ °¡±â',
+            #                      'name': 'í™•ì¸í•˜ëŸ¬ ê°€ê¸°',
             #                      'type': 'WL',
             #                      'url_mobile': 'http://www.boltnnut.com',
             #                      'url_pc': 'http://www.boltnnut.com'
@@ -103,7 +125,7 @@ class kakaotalk(object):
 
 
 class kakaotalk2(object):
-# ºó ÀüÈ­¹øÈ£ / ÀÌ»óÇÑ ÀüÈ­¹øÈ£´Â ¿¡·¯¶å´Ï´Ù.
+# ë¹ˆ ì „í™”ë²ˆí˜¸ / ì´ìƒí•œ ì „í™”ë²ˆí˜¸ëŠ” ì—ëŸ¬ëœ¹ë‹ˆë‹¤.
         def send(phone_list, subject, subclass,category):
             # print(subject)
             # print(phone_list)
@@ -113,11 +135,11 @@ class kakaotalk2(object):
             #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
             #          'to': phone, 'content': {
             #        'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'request_to_partner3',
-            #                 'message': 'ÆÄÆ®³Ê´Ô¿¡°Ô ÀûÇÕÇÑ ÀÇ·Ú¼­°¡ µµÂøÇß½À´Ï´Ù.\nÀÇ·Ú¼­¸í : ' + subject + '\nÀÇ·ÚÁ¦Ç°ºĞ¾ß : ' + str(subclass) + '\nÁ¦Á¶ÀÇ·ÚºĞ¾ß : ' + category,
+            #                 'message': 'íŒŒíŠ¸ë„ˆë‹˜ì—ê²Œ ì í•©í•œ ì˜ë¢°ì„œê°€ ë„ì°©í–ˆìŠµë‹ˆë‹¤.\nì˜ë¢°ì„œëª… : ' + subject + '\nì˜ë¢°ì œí’ˆë¶„ì•¼ : ' + str(subclass) + '\nì œì¡°ì˜ë¢°ë¶„ì•¼ : ' + category,
 
             #               'button': [
             #                     {
-            #                      'name': 'È®ÀÎÇÏ·¯ °¡±â',
+            #                      'name': 'í™•ì¸í•˜ëŸ¬ ê°€ê¸°',
             #                      'type': 'WL',
             #                      'url_mobile': 'http://www.boltnnut.com',
             #                      'url_pc': 'http://www.boltnnut.com'
@@ -130,7 +152,7 @@ class kakaotalk2(object):
 
 
 class kakaotalk_request(object):
-# ºó ÀüÈ­¹øÈ£ / ÀÌ»óÇÑ ÀüÈ­¹øÈ£´Â ¿¡·¯¶å´Ï´Ù.
+# ë¹ˆ ì „í™”ë²ˆí˜¸ / ì´ìƒí•œ ì „í™”ë²ˆí˜¸ëŠ” ì—ëŸ¬ëœ¹ë‹ˆë‹¤.
         def send(phone_list):
             # print(phone_list)
             # for phone in phone_list:
@@ -139,11 +161,11 @@ class kakaotalk_request(object):
             #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
             #          'to': phone, 'content': {
             #        'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'answer_to_client',
-            #                 'message': '°í°´´ÔÀÇ ÀÇ·Ú¿¡ ´ëÇÑ Àü¹®°¡ÀÇ Á¦¾È¼­°¡ µµÂøÇÏ¿´½À´Ï´Ù.\n\n* ÇØ´ç ¸Ş½ÃÁö´Â °í°´´Ô²²¼­ ¿äÃ»ÇÏ½Å ÀÇ·Ú¿¡ ´ëÇÑ Á¦¾ÈÀÌ ÀÖÀ» °æ¿ì ¹ß¼ÛµË´Ï´Ù',
+            #                 'message': 'ê³ ê°ë‹˜ì˜ ì˜ë¢°ì— ëŒ€í•œ ì „ë¬¸ê°€ì˜ ì œì•ˆì„œê°€ ë„ì°©í•˜ì˜€ìŠµë‹ˆë‹¤.\n\n* í•´ë‹¹ ë©”ì‹œì§€ëŠ” ê³ ê°ë‹˜ê»˜ì„œ ìš”ì²­í•˜ì‹  ì˜ë¢°ì— ëŒ€í•œ ì œì•ˆì´ ìˆì„ ê²½ìš° ë°œì†¡ë©ë‹ˆë‹¤',
 
             #               'button': [
             #                     {
-            #                      'name': 'È®ÀÎÇÏ·¯ °¡±â',
+            #                      'name': 'í™•ì¸í•˜ëŸ¬ ê°€ê¸°',
             #                      'type': 'WL',
             #                      'url_mobile': 'http://www.boltnnut.com',
             #                      'url_pc': 'http://www.boltnnut.com'
@@ -155,20 +177,20 @@ class kakaotalk_request(object):
             return
 
 class kakaotalk_request_edit_end(object):
-# ºó ÀüÈ­¹øÈ£ / ÀÌ»óÇÑ ÀüÈ­¹øÈ£´Â ¿¡·¯¶å´Ï´Ù.
+# ë¹ˆ ì „í™”ë²ˆí˜¸ / ì´ìƒí•œ ì „í™”ë²ˆí˜¸ëŠ” ì—ëŸ¬ëœ¹ë‹ˆë‹¤.
         def send(phone):
             #  url = 'https://api.bizppurio.com/v1/message'
             #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
             #          'to': phone, 'content': {
             #          'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'request_edit_end',
-            #                 'message':'°í°´´ÔÀÇ ÀÇ·Ú¼­ °ËÅä°¡ ¿Ï·áµÇ¾î ÆÄÆ®³Ê Á¦¾È¼­ ¸ğÁıÀÌ ½ÃÀÛµÇ¾ú½À´Ï´Ù.\n\nÁ¦¾È¼­°¡ µµÂøÇÒ ¶§¸¶´Ù Ä«Ä«¿ÀÅå ¾Ë¸²¸Ş½ÃÁö¸¦ º¸³»µå¸³´Ï´Ù.\n\nÁ¶±İ¸¸ ±â´Ù·ÁÁÖ¼¼¿ä'}}}
+            #                 'message':'ê³ ê°ë‹˜ì˜ ì˜ë¢°ì„œ ê²€í† ê°€ ì™„ë£Œë˜ì–´ íŒŒíŠ¸ë„ˆ ì œì•ˆì„œ ëª¨ì§‘ì´ ì‹œì‘ë˜ì—ˆìŠµë‹ˆë‹¤.\n\nì œì•ˆì„œê°€ ë„ì°©í•  ë•Œë§ˆë‹¤ ì¹´ì¹´ì˜¤í†¡ ì•Œë¦¼ë©”ì‹œì§€ë¥¼ ë³´ë‚´ë“œë¦½ë‹ˆë‹¤.\n\nì¡°ê¸ˆë§Œ ê¸°ë‹¤ë ¤ì£¼ì„¸ìš”'}}}
             #  headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
             #  response = requests.post(url, data=json.dumps(data), headers=headers)
             #  return response
             return
 
 class kakaotalk_send_information(object):
-# ºó ÀüÈ­¹øÈ£ / ÀÌ»óÇÑ ÀüÈ­¹øÈ£´Â ¿¡·¯¶å´Ï´Ù.
+# ë¹ˆ ì „í™”ë²ˆí˜¸ / ì´ìƒí•œ ì „í™”ë²ˆí˜¸ëŠ” ì—ëŸ¬ëœ¹ë‹ˆë‹¤.
         def send(phone_list, subject, content, price, period, file):
             # print(subject)
             # print(phone_list)
@@ -178,7 +200,7 @@ class kakaotalk_send_information(object):
             #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
             #          'to': phone, 'content': {
             #          'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_request_information3',
-            #                 'message': '´ÙÀ½ ÀÇ·Ú¸¦ ÁÖ½Å Å¬¶óÀÌ¾ğÆ®¿¡°Ô ÆÄÆ®³Ê´ÔÀ» ÃßÃµÇÏ°íÀÚÇÕ´Ï´Ù.\nÅ¬¶óÀÌ¾ğÆ®¿Í ¼ÒÅëÀÇ»ç°¡ ÀÖÀ¸½Ã¸é ¡®O¡¯¸¦, ¾øÀ¸½Ã´Ù¸é ¡®X¡¯¸¦ ³²°ÜÁÖ½Ã±æ ¹Ù¶ø´Ï´Ù.\n\nÇØ´ç ÇÁ·ÎÁ§Æ®¸¦ ÁøÇàÇÒ ÀÇ»ç°¡ ÀÖ´Â ¾÷Ã¼¸¸ ÃßÃµµÉ ¿¹Á¤ÀÔ´Ï´Ù.\nÃßÃµ ÈÄ Å¬¶óÀÌ¾ğÆ®ºĞ²²¼­ ÆÄÆ®³Ê´ÔÀÇ Á¤º¸¸¦ È®ÀÎÇÑ ÈÄ ÀüÈ­µå¸± ¼ö ÀÖ½À´Ï´Ù.\n\nÀÇ·ÚÁ¦Ç° : ' + subject + '\n\n»ó´ã³»¿ë : ' + content + '\n\nÈñ¸Á¿¹»ê : ' + price + '\n\nÈñ¸Á±â°£ : ' + period +  '\n\nÀÇ·ÚÆÄÀÏ : ' + file
+            #                 'message': 'ë‹¤ìŒ ì˜ë¢°ë¥¼ ì£¼ì‹  í´ë¼ì´ì–¸íŠ¸ì—ê²Œ íŒŒíŠ¸ë„ˆë‹˜ì„ ì¶”ì²œí•˜ê³ ìí•©ë‹ˆë‹¤.\ní´ë¼ì´ì–¸íŠ¸ì™€ ì†Œí†µì˜ì‚¬ê°€ ìˆìœ¼ì‹œë©´ â€˜Oâ€™ë¥¼, ì—†ìœ¼ì‹œë‹¤ë©´ â€˜Xâ€™ë¥¼ ë‚¨ê²¨ì£¼ì‹œê¸¸ ë°”ëë‹ˆë‹¤.\n\ní•´ë‹¹ í”„ë¡œì íŠ¸ë¥¼ ì§„í–‰í•  ì˜ì‚¬ê°€ ìˆëŠ” ì—…ì²´ë§Œ ì¶”ì²œë  ì˜ˆì •ì…ë‹ˆë‹¤.\nì¶”ì²œ í›„ í´ë¼ì´ì–¸íŠ¸ë¶„ê»˜ì„œ íŒŒíŠ¸ë„ˆë‹˜ì˜ ì •ë³´ë¥¼ í™•ì¸í•œ í›„ ì „í™”ë“œë¦´ ìˆ˜ ìˆìŠµë‹ˆë‹¤.\n\nì˜ë¢°ì œí’ˆ : ' + subject + '\n\nìƒë‹´ë‚´ìš© : ' + content + '\n\ní¬ë§ì˜ˆì‚° : ' + price + '\n\ní¬ë§ê¸°ê°„ : ' + period +  '\n\nì˜ë¢°íŒŒì¼ : ' + file
             #                 }
             #             }
             #          }
@@ -202,7 +224,7 @@ class kakaotalk_send_IDPassword(object):
                 'at': {
                     'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 
                     'templatecode': 'send_user_id_password',
-                    'message': '¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\nÀÇ·ÚÁÖ½Å ' + title + 'ÀÇ °¡°ßÀûÀ» ´Ù½Ã È®ÀÎÇÒ ¼ö ÀÖ´Â\nÀÇ·Ú ¾ÆÀÌµğ¿Í ºñ¹Ğ¹øÈ£ ¾È³»µå¸³´Ï´Ù.\n\nÀÇ·Ú¾ÆÀÌµğ : '+ username + '\nºñ¹Ğ¹øÈ£ : ' + password +'\n\nº¼Æ®¾Ø³ÊÆ® È¨ÆäÀÌÁö¿¡¼­ ÇØ´ç ¾ÆÀÌµğ¿Í ºñ¹Ğ¹øÈ£·Î ·Î±×ÀÎÇÏ½Å ÈÄ\n»ó´Ü ¸Ş´ºÃ¢¿¡¼­ ±âÁ¸ ÀÇ·Ú¿¡¼­ ÀÇ·Ú ÁÖ½Å '+title +'ÀÇ °¡°ßÀûÀ» ÀçÈ®ÀÎÇÒ ¼ö ÀÖ½À´Ï´Ù.'
+                    'message': 'ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\nì˜ë¢°ì£¼ì‹  ' + title + 'ì˜ ê°€ê²¬ì ì„ ë‹¤ì‹œ í™•ì¸í•  ìˆ˜ ìˆëŠ”\nì˜ë¢° ì•„ì´ë””ì™€ ë¹„ë°€ë²ˆí˜¸ ì•ˆë‚´ë“œë¦½ë‹ˆë‹¤.\n\nì˜ë¢°ì•„ì´ë”” : '+ username + '\në¹„ë°€ë²ˆí˜¸ : ' + password +'\n\në³¼íŠ¸ì•¤ë„ˆíŠ¸ í™ˆí˜ì´ì§€ì—ì„œ í•´ë‹¹ ì•„ì´ë””ì™€ ë¹„ë°€ë²ˆí˜¸ë¡œ ë¡œê·¸ì¸í•˜ì‹  í›„\nìƒë‹¨ ë©”ë‰´ì°½ì—ì„œ ê¸°ì¡´ ì˜ë¢°ì—ì„œ ì˜ë¢° ì£¼ì‹  '+title +'ì˜ ê°€ê²¬ì ì„ ì¬í™•ì¸í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.'
                     }
                 }
             }
@@ -226,7 +248,7 @@ class kakaotalk_send_ID_ExistUser(object):
                 'at': {
                     'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 
                     'templatecode': 'send_id_exist_user',
-                    'message': '¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\nÀÇ·ÚÁÖ½Å ' + title + 'ÀÇ °¡°ßÀûÀ» ´Ù½Ã È®ÀÎÇÒ ¼ö ÀÖ´Â\nÀÇ·Ú ¾ÆÀÌµğ¸¦ ¾È³»µå¸³´Ï´Ù.\n\nÀÇ·Ú¾ÆÀÌµğ : '+ username +'\n\nº¼Æ®¾Ø³ÊÆ® È¨ÆäÀÌÁö¿¡¼­ ÇØ´ç ¾ÆÀÌµğ¿Í ºñ¹Ğ¹øÈ£·Î ·Î±×ÀÎÇÏ½Å ÈÄ\n»ó´Ü ¸Ş´ºÃ¢¿¡¼­ ±âÁ¸ ÀÇ·Ú¿¡¼­ ÀÇ·Ú ÁÖ½Å '+title +'ÀÇ °¡°ßÀûÀ» ÀçÈ®ÀÎÇÒ ¼ö ÀÖ½À´Ï´Ù.'
+                    'message': 'ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\nì˜ë¢°ì£¼ì‹  ' + title + 'ì˜ ê°€ê²¬ì ì„ ë‹¤ì‹œ í™•ì¸í•  ìˆ˜ ìˆëŠ”\nì˜ë¢° ì•„ì´ë””ë¥¼ ì•ˆë‚´ë“œë¦½ë‹ˆë‹¤.\n\nì˜ë¢°ì•„ì´ë”” : '+ username +'\n\në³¼íŠ¸ì•¤ë„ˆíŠ¸ í™ˆí˜ì´ì§€ì—ì„œ í•´ë‹¹ ì•„ì´ë””ì™€ ë¹„ë°€ë²ˆí˜¸ë¡œ ë¡œê·¸ì¸í•˜ì‹  í›„\nìƒë‹¨ ë©”ë‰´ì°½ì—ì„œ ê¸°ì¡´ ì˜ë¢°ì—ì„œ ì˜ë¢° ì£¼ì‹  '+title +'ì˜ ê°€ê²¬ì ì„ ì¬í™•ì¸í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.'
                     }
                 }
             }
@@ -250,7 +272,7 @@ class kakaotalk_set_temp_password():
                 'at': {
                     'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 
                     'templatecode': 'set_temp_password',
-                    'message': '[º¼Æ®¾Ø³ÊÆ®] È¸¿ø´ÔÀÇ ÀÓ½Ãºñ¹Ğ¹øÈ£¸¦ Ä«Ä«¿ÀÅåÀ¸·Î º¸³»µå¸³´Ï´Ù.\nÈ¸¿ø´ÔÀÇ ÀÓ½Ãºñ¹Ğ¹øÈ£´Â ' +  tempPassword + ' ÀÔ´Ï´Ù.\n\nÈ¸¿ø´ÔÀÌ ºñ¹Ğ¹øÈ£¸¦ º¯°æÇÏÁö ¾Ê¾Ò´Âµ¥, ÇØ´ç¸Ş¼¼Áö¸¦ ¹Ş¾ÒÀ» ½Ã º¼Æ®¾Ø³ÊÆ®·Î ¹®ÀÇÇØÁÖ½Ê½Ã¿À.'
+                    'message': '[ë³¼íŠ¸ì•¤ë„ˆíŠ¸] íšŒì›ë‹˜ì˜ ì„ì‹œë¹„ë°€ë²ˆí˜¸ë¥¼ ì¹´ì¹´ì˜¤í†¡ìœ¼ë¡œ ë³´ë‚´ë“œë¦½ë‹ˆë‹¤.\níšŒì›ë‹˜ì˜ ì„ì‹œë¹„ë°€ë²ˆí˜¸ëŠ” ' +  tempPassword + ' ì…ë‹ˆë‹¤.\n\níšŒì›ë‹˜ì´ ë¹„ë°€ë²ˆí˜¸ë¥¼ ë³€ê²½í•˜ì§€ ì•Šì•˜ëŠ”ë°, í•´ë‹¹ë©”ì„¸ì§€ë¥¼ ë°›ì•˜ì„ ì‹œ ë³¼íŠ¸ì•¤ë„ˆíŠ¸ë¡œ ë¬¸ì˜í•´ì£¼ì‹­ì‹œì˜¤.'
                     }
                 }
             }
@@ -264,10 +286,10 @@ class kakaotalk_send_meeting_confirm():
             # token = KakaoToken.objects.get(id=1)
             # Authorization = token.token
             
-            # consultant1 = "³ëÇö¼ö ±â¼úÆÀÀå"
-            # consultant2 = "ÃÖÁø¿µ ±â¼úÀÌ»ç"
+            # consultant1 = "ë…¸í˜„ìˆ˜ ê¸°ìˆ íŒ€ì¥"
+            # consultant2 = "ìµœì§„ì˜ ê¸°ìˆ ì´ì‚¬"
             # consultant3 = Consultant.objects.order_by("?").filter(id__lt=9).first().name
-            # print("·£´ı ÄÁ¼³ÅÏÆ® : ",consultant3)
+            # print("ëœë¤ ì»¨ì„¤í„´íŠ¸ : ",consultant3)
             # url = 'https://api.bizppurio.com/v3/message'
             # data = {
             #     'account': 'boltnnut_korea', 
@@ -278,10 +300,10 @@ class kakaotalk_send_meeting_confirm():
             #     'content': {
             #         'at': {
             #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_meeting_confirm',
-            #             'message': '¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\n\nÀÇ·ÚÁÖ½Å ' + requestTitle + 'ÀÇ °¡°ßÀûÀº Àß ¹Ş¾Æº¸¼Ì³ª¿ä?\n\n'+requestTitle +' ÀÇ·Ú¿¡´Â '+requestCategory+'ÀÇ Àü¹® ÄÁ¼³ÅÏÆ®ÀÎ ' + consultant1 +',' + consultant2 + ',' + consultant3 +'´ÔÀÌ ¹èÁ¤µÇ¾î ÀÖ½À´Ï´Ù.\n\nº¼Æ®¾Ø³ÊÆ®´Â Àü¹® ÄÁ¼³ÅÏÆ®ÀÇ »ó´ãÀ» ÅëÇÑ Á¤È®ÇÑ °ßÀû ¼­ºñ½º¸¦ ¹«·á·Î Á¦°øÇÏ°í ÀÖÀ¸´Ï\n\n»ó´ãÀ» ÅëÇØ '+requestTitle +'ÀÇ Á¤È®ÇÑ °ßÀû°ú Àü¹® Áö½ÄÀ» ¾Ë¾Æº¸¼¼¿ä\n\n»ó´ãÀº º¼Æ®¾Ø³ÊÆ® È¨ÆäÀÌÁö¿¡¼­ ·Î±×ÀÎÇÏ½Å ÈÄ ÀÛ¼ºÇÏ½Å ÀÇ·Ú ÆäÀÌÁö¿¡¼­ ¿äÃ»ÇÏ½Ç ¼ö ÀÖ½À´Ï´Ù.\n\nÁö±İ ¹Ù·Î »ó´ãÀ» ¿øÇÏ½Ã¸é º¼Æ®¾Ø³ÊÆ® »ó´ã ÀüÈ­ÀÎ 02-926-6637·Î ¹Ù·Î ÀüÈ­ÁÖ¼¼¿ä.',
+            #             'message': 'ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\n\nì˜ë¢°ì£¼ì‹  ' + requestTitle + 'ì˜ ê°€ê²¬ì ì€ ì˜ ë°›ì•„ë³´ì…¨ë‚˜ìš”?\n\n'+requestTitle +' ì˜ë¢°ì—ëŠ” '+requestCategory+'ì˜ ì „ë¬¸ ì»¨ì„¤í„´íŠ¸ì¸ ' + consultant1 +',' + consultant2 + ',' + consultant3 +'ë‹˜ì´ ë°°ì •ë˜ì–´ ìˆìŠµë‹ˆë‹¤.\n\në³¼íŠ¸ì•¤ë„ˆíŠ¸ëŠ” ì „ë¬¸ ì»¨ì„¤í„´íŠ¸ì˜ ìƒë‹´ì„ í†µí•œ ì •í™•í•œ ê²¬ì  ì„œë¹„ìŠ¤ë¥¼ ë¬´ë£Œë¡œ ì œê³µí•˜ê³  ìˆìœ¼ë‹ˆ\n\nìƒë‹´ì„ í†µí•´ '+requestTitle +'ì˜ ì •í™•í•œ ê²¬ì ê³¼ ì „ë¬¸ ì§€ì‹ì„ ì•Œì•„ë³´ì„¸ìš”\n\nìƒë‹´ì€ ë³¼íŠ¸ì•¤ë„ˆíŠ¸ í™ˆí˜ì´ì§€ì—ì„œ ë¡œê·¸ì¸í•˜ì‹  í›„ ì‘ì„±í•˜ì‹  ì˜ë¢° í˜ì´ì§€ì—ì„œ ìš”ì²­í•˜ì‹¤ ìˆ˜ ìˆìŠµë‹ˆë‹¤.\n\nì§€ê¸ˆ ë°”ë¡œ ìƒë‹´ì„ ì›í•˜ì‹œë©´ ë³¼íŠ¸ì•¤ë„ˆíŠ¸ ìƒë‹´ ì „í™”ì¸ 02-926-6637ë¡œ ë°”ë¡œ ì „í™”ì£¼ì„¸ìš”.',
             #             'button': [
             #                 {
-            #                     'name': '¹«·á »ó´ã ¹ŞÀ¸·¯ °¡±â',
+            #                     'name': 'ë¬´ë£Œ ìƒë‹´ ë°›ìœ¼ëŸ¬ ê°€ê¸°',
             #                     'type': 'WL',
             #                     'url_mobile': 'https://www.boltnnut.com/',
             #                     'url_pc': 'https://www.boltnnut.com/'
@@ -298,11 +320,11 @@ class kakaotalk_send_meeting_confirm():
 class kakaotalk_send_meetin_content(object):
     def send(title, startAt, isOnline, phone):
         # try:
-        #     message = "¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\nÀÇ·ÚÁÖ½Å {title}¿¡ Àü¹® ÄÁ¼³ÅÏÆ®°¡ ¹èÁ¤µÇ¾î »ó´ãÀ» ÁøÇàÇÒ ¿¹Á¤ÀÔ´Ï´Ù.\n{startAt}¿¡ {place}¿¡¼­ ºË°Ú½À´Ï´Ù.\n{online}\nÁ¤È®ÇÑ »ó´ãÀ» À§ÇØ¼­ Ã·ºÎµÈ ¸µÅ©¿¡ Æ÷ÇÔµÈ »ó´ã ÀÇ·Ú¼­¸¦ ÀÛ¼ºÇØÁÖ½Ã¸é\n´ã´ç ÄÁ¼³ÅÏÆ®´Ô²²¼­ ´õ¿í ÀûÇÕÇÑ »ó´ãÀ» µå¸± ¼ö ÀÖ½À´Ï´Ù.\nÃß°¡ÀûÀ¸·Î ±Ã±İÇÏ½Å »çÇ×ÀÌ ÀÖ´Ù¸é {BnNPhone}, {BnNEmail}·Î ¹®ÀÇ»çÇ×À» º¸³»ÁÖ¼¼¿ä.\n°¨»çÇÕ´Ï´Ù.".format(
+        #     message = "ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\nì˜ë¢°ì£¼ì‹  {title}ì— ì „ë¬¸ ì»¨ì„¤í„´íŠ¸ê°€ ë°°ì •ë˜ì–´ ìƒë‹´ì„ ì§„í–‰í•  ì˜ˆì •ì…ë‹ˆë‹¤.\n{startAt}ì— {place}ì—ì„œ ëµ™ê² ìŠµë‹ˆë‹¤.\n{online}\nì •í™•í•œ ìƒë‹´ì„ ìœ„í•´ì„œ ì²¨ë¶€ëœ ë§í¬ì— í¬í•¨ëœ ìƒë‹´ ì˜ë¢°ì„œë¥¼ ì‘ì„±í•´ì£¼ì‹œë©´\në‹´ë‹¹ ì»¨ì„¤í„´íŠ¸ë‹˜ê»˜ì„œ ë”ìš± ì í•©í•œ ìƒë‹´ì„ ë“œë¦´ ìˆ˜ ìˆìŠµë‹ˆë‹¤.\nì¶”ê°€ì ìœ¼ë¡œ ê¶ê¸ˆí•˜ì‹  ì‚¬í•­ì´ ìˆë‹¤ë©´ {BnNPhone}, {BnNEmail}ë¡œ ë¬¸ì˜ì‚¬í•­ì„ ë³´ë‚´ì£¼ì„¸ìš”.\nê°ì‚¬í•©ë‹ˆë‹¤.".format(
         #         title = title,
         #         startAt = startAt,
-        #         place = '¼­¿ïÆ¯º°½Ã ¼ººÏ±¸ °í·Á´ë·Î27±æ 3 2Ãş' if not isOnline else 'ZooM È­»óÈ¸ÀÇ',
-        #         online = 'ZooM È­»óÈ¸ÀÇ ÁÖ¼Ò´Â ¹ÌÆÃ 1½Ã°£ Àü ´Ù½Ã ¾È³» µå¸®°Ú½À´Ï´Ù.\n' if isOnline else ' ',
+        #         place = 'ì„œìš¸íŠ¹ë³„ì‹œ ì„±ë¶êµ¬ ê³ ë ¤ëŒ€ë¡œ27ê¸¸ 3 2ì¸µ' if not isOnline else 'ZooM í™”ìƒíšŒì˜',
+        #         online = 'ZooM í™”ìƒíšŒì˜ ì£¼ì†ŒëŠ” ë¯¸íŒ… 1ì‹œê°„ ì „ ë‹¤ì‹œ ì•ˆë‚´ ë“œë¦¬ê² ìŠµë‹ˆë‹¤.\n' if isOnline else ' ',
         #         BnNPhone = '02-926-6637',
         #         BnNEmail = 'project@boltnnut.com'
         #     )
@@ -322,7 +344,7 @@ class kakaotalk_send_meetin_content(object):
         #                 'message': message,
         #                 'button': [
         #                     {
-        #                         'name': '»ó´ãÀÇ·Ú¼­ ¹Ş±â',
+        #                         'name': 'ìƒë‹´ì˜ë¢°ì„œ ë°›ê¸°',
         #                         'type': 'WL',
         #                         'url_mobile': 'https://boltnnutplatform.s3.ap-northeast-2.amazonaws.com/media/request/request.docx',
         #                         'url_pc': 'https://boltnnutplatform.s3.ap-northeast-2.amazonaws.com/media/request/request.docx'
@@ -353,10 +375,10 @@ class kakaotalk_send_request_review():
             #     'content': {
             #         'at': {
             #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_request_review',
-            #             'message': '¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\n\nÀÇ·ÚÁÖ½Å ' + requestTitle + '¿¡ ´ëÇÑ ' +consultant +'´ÔÀÇ »ó´ãÀº ¾î¶°¼Ì³ª¿ä?\n\n ºÎÁ·ÇÑ Á¡ÀÌ³ª ÄªÂùÇÒ¸¸ÇÑ Á¡ÀÌ ÀÖ´Ù¸é Ã·ºÎµÈ ¸µÅ©¿¡¼­ ¸®ºä¸¦ ÀÛ¼ºÇØÁÖ¼¼¿ä.\n\n¸Å´Ş ¸®ºä¸¦ ÀÛ¼ºÇØÁÖ½Å °í°´ºĞµé Áß ÇÑ ºĞÀ» ¼±¹ßÇÏ¿© ¹«·á ¸ğµ¨¸µ ¼­ºñ½º¸¦ Á¦°øÇÏ°í ÀÖ½À´Ï´Ù.',
+            #             'message': 'ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\n\nì˜ë¢°ì£¼ì‹  ' + requestTitle + 'ì— ëŒ€í•œ ' +consultant +'ë‹˜ì˜ ìƒë‹´ì€ ì–´ë– ì…¨ë‚˜ìš”?\n\n ë¶€ì¡±í•œ ì ì´ë‚˜ ì¹­ì°¬í• ë§Œí•œ ì ì´ ìˆë‹¤ë©´ ì²¨ë¶€ëœ ë§í¬ì—ì„œ ë¦¬ë·°ë¥¼ ì‘ì„±í•´ì£¼ì„¸ìš”.\n\në§¤ë‹¬ ë¦¬ë·°ë¥¼ ì‘ì„±í•´ì£¼ì‹  ê³ ê°ë¶„ë“¤ ì¤‘ í•œ ë¶„ì„ ì„ ë°œí•˜ì—¬ ë¬´ë£Œ ëª¨ë¸ë§ ì„œë¹„ìŠ¤ë¥¼ ì œê³µí•˜ê³  ìˆìŠµë‹ˆë‹¤.',
             #             'button': [
             #                 {
-            #                     'name': '¸®ºäÇÏ·¯°¡±â',
+            #                     'name': 'ë¦¬ë·°í•˜ëŸ¬ê°€ê¸°',
             #                     'type': 'WL',
             #                     'url_mobile': 'https://www.boltnnut.com/',
             #                     'url_pc': 'https://www.boltnnut.com/'
@@ -386,10 +408,10 @@ class kakaotalk_send_request_rerequest():
             #     'content': {
             #         'at': {
             #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'bizp_2021020216131026670531311',
-            #             'message': '¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\n\n¿äÃ» ÁÖ½Å ÀÇ·Ú : ' + requestTitle + '¿¡´Â Àü¹®°¡ÀÎ\n\nÃÖÁø¿µ ±â¼úÀÌ»ç´ÔÀÌ ¹èÁ¤µÇ¾î ÀÖ½À´Ï´Ù.\n\nÀÇ·Ú ±âº»Á¤º¸¿Í 5°¡Áö ¼±ÅÃÁú¹®¸¸ ´äº¯ÇØÁÖ½Ã¸é '+requestTitle+'ÀÇ °¡°ßÀû°ú\n\nÀü¹® ÄÁ¼³ÅÏÆ® »ó´ãÀ» ¹«·á·Î ¹ŞÀ» ¼ö ÀÖÀ¸´Ï È®ÀÎÇØº¸¼¼¿ä.\n\n¿Â¶óÀÎ ÀÇ·Ú ÀÛ¼º ½Ã¿¡ ºÒÆíÇÑ »çÇ×ÀÌ ÀÖ¾ú´Ù¸é '+ boltnnutPhone +' È¤Àº\n\n' + boltnnutEmail +'·Î ¿¬¶ôÁÖ¼¼¿ä.',
+            #             'message': 'ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\n\nìš”ì²­ ì£¼ì‹  ì˜ë¢° : ' + requestTitle + 'ì—ëŠ” ì „ë¬¸ê°€ì¸\n\nìµœì§„ì˜ ê¸°ìˆ ì´ì‚¬ë‹˜ì´ ë°°ì •ë˜ì–´ ìˆìŠµë‹ˆë‹¤.\n\nì˜ë¢° ê¸°ë³¸ì •ë³´ì™€ 5ê°€ì§€ ì„ íƒì§ˆë¬¸ë§Œ ë‹µë³€í•´ì£¼ì‹œë©´ '+requestTitle+'ì˜ ê°€ê²¬ì ê³¼\n\nì „ë¬¸ ì»¨ì„¤í„´íŠ¸ ìƒë‹´ì„ ë¬´ë£Œë¡œ ë°›ì„ ìˆ˜ ìˆìœ¼ë‹ˆ í™•ì¸í•´ë³´ì„¸ìš”.\n\nì˜¨ë¼ì¸ ì˜ë¢° ì‘ì„± ì‹œì— ë¶ˆí¸í•œ ì‚¬í•­ì´ ìˆì—ˆë‹¤ë©´ '+ boltnnutPhone +' í˜¹ì€\n\n' + boltnnutEmail +'ë¡œ ì—°ë½ì£¼ì„¸ìš”.',
             #             'button': [
             #                 {
-            #                     'name': 'ÀÇ·ÚÀÛ¼ºÇÏ·¯°¡±â',
+            #                     'name': 'ì˜ë¢°ì‘ì„±í•˜ëŸ¬ê°€ê¸°',
             #                     'type': 'WL',
             #                     'url_mobile': 'http://www.boltnnut.com/',
             #                     'url_pc': 'http://www.boltnnut.com/'
@@ -419,10 +441,10 @@ class kakaotalk_send_appreciate():
             #     'content': {
             #         'at': {
             #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_appreciate',
-            #             'message': '¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\n\nº¼Æ®¾Ø³ÊÆ®¿¡ '+requestTitle +'ÀÇ·Ú¸¦ ÁÖ¼Å¼­ °¨»çÇÕ´Ï´Ù.\n\nÀúÈñ º¼Æ®¾Ø³ÊÆ® ¼­ºñ½º°¡ ºÎÁ·ÇÑ Á¡ÀÌ³ª ÄªÂùÇÒ¸¸ÇÑ Á¡ÀÌ ÀÖ´Ù¸é Ã·ºÎµÈ ¸µÅ©¿¡¼­ ¸®ºä¸¦ ÀÛ¼ºÇØÁÖ¼¼¿ä.\n\n°í°´´Ô²²¼­ ÁÖ½Å ¼ÒÁßÇÑ ÀÇ°ß ÇÏ³ªÇÏ³ª ±Í±â¿ï¿© µè°í ºÎÁ·ÇÑ Á¡À» °³¼±ÇÏµµ·Ï ÇÏ°Ú½À´Ï´Ù.\n\n¸Å´Ş ¸®ºä¸¦ ÀÛ¼ºÇØÁÖ½Å °í°´ºĞµé Áß ÇÑ ºĞÀ» ¼±¹ßÇÏ¿© ¹«·á ¸ğµ¨¸µ ¼­ºñ½º¸¦ Á¦°øÇÏ°í ÀÖ½À´Ï´Ù.\n\nº¼Æ®¾Ø³ÊÆ®´Â °í°´ ºĞµéÀÇ ÀÇ·Ú ¹°Ç°À» ÃÖÀûÀÇ °¡°İ¿¡ Á¦´ë·Î ¸¸µé¾îµå¸± ¼ö ÀÖµµ·Ï ³ë·ÂÇÏ°Ú½À´Ï´Ù.',
+            #             'message': 'ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\n\në³¼íŠ¸ì•¤ë„ˆíŠ¸ì— '+requestTitle +'ì˜ë¢°ë¥¼ ì£¼ì…”ì„œ ê°ì‚¬í•©ë‹ˆë‹¤.\n\nì €í¬ ë³¼íŠ¸ì•¤ë„ˆíŠ¸ ì„œë¹„ìŠ¤ê°€ ë¶€ì¡±í•œ ì ì´ë‚˜ ì¹­ì°¬í• ë§Œí•œ ì ì´ ìˆë‹¤ë©´ ì²¨ë¶€ëœ ë§í¬ì—ì„œ ë¦¬ë·°ë¥¼ ì‘ì„±í•´ì£¼ì„¸ìš”.\n\nê³ ê°ë‹˜ê»˜ì„œ ì£¼ì‹  ì†Œì¤‘í•œ ì˜ê²¬ í•˜ë‚˜í•˜ë‚˜ ê·€ê¸°ìš¸ì—¬ ë“£ê³  ë¶€ì¡±í•œ ì ì„ ê°œì„ í•˜ë„ë¡ í•˜ê² ìŠµë‹ˆë‹¤.\n\në§¤ë‹¬ ë¦¬ë·°ë¥¼ ì‘ì„±í•´ì£¼ì‹  ê³ ê°ë¶„ë“¤ ì¤‘ í•œ ë¶„ì„ ì„ ë°œí•˜ì—¬ ë¬´ë£Œ ëª¨ë¸ë§ ì„œë¹„ìŠ¤ë¥¼ ì œê³µí•˜ê³  ìˆìŠµë‹ˆë‹¤.\n\në³¼íŠ¸ì•¤ë„ˆíŠ¸ëŠ” ê³ ê° ë¶„ë“¤ì˜ ì˜ë¢° ë¬¼í’ˆì„ ìµœì ì˜ ê°€ê²©ì— ì œëŒ€ë¡œ ë§Œë“¤ì–´ë“œë¦´ ìˆ˜ ìˆë„ë¡ ë…¸ë ¥í•˜ê² ìŠµë‹ˆë‹¤.',
             #             'button': [
             #                 {
-            #                     'name': '¸®ºäÇÏ·¯°¡±â',
+            #                     'name': 'ë¦¬ë·°í•˜ëŸ¬ê°€ê¸°',
             #                     'type': 'WL',
             #                     'url_mobile': 'https://www.boltnnut.com/',
             #                     'url_pc': 'https://www.boltnnut.com/'
@@ -452,10 +474,10 @@ class kakaotalk_archiving_after_meeting():
             #     'content': {
             #         'at': {
             #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_appreciate',
-            #             'message': '¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\n\nº¼Æ®¾Ø³ÊÆ®¿¡ '+requestTitle +'ÀÇ·Ú¸¦ ÁÖ¼Å¼­ °¨»çÇÕ´Ï´Ù.\n\nÀúÈñ º¼Æ®¾Ø³ÊÆ® ¼­ºñ½º°¡ ºÎÁ·ÇÑ Á¡ÀÌ³ª ÄªÂùÇÒ¸¸ÇÑ Á¡ÀÌ ÀÖ´Ù¸é Ã·ºÎµÈ ¸µÅ©¿¡¼­ ¸®ºä¸¦ ÀÛ¼ºÇØÁÖ¼¼¿ä.\n\n°í°´´Ô²²¼­ ÁÖ½Å ¼ÒÁßÇÑ ÀÇ°ß ÇÏ³ªÇÏ³ª ±Í±â¿ï¿© µè°í ºÎÁ·ÇÑ Á¡À» °³¼±ÇÏµµ·Ï ÇÏ°Ú½À´Ï´Ù.\n\n¸Å´Ş ¸®ºä¸¦ ÀÛ¼ºÇØÁÖ½Å °í°´ºĞµé Áß ÇÑ ºĞÀ» ¼±¹ßÇÏ¿© ¹«·á ¸ğµ¨¸µ ¼­ºñ½º¸¦ Á¦°øÇÏ°í ÀÖ½À´Ï´Ù.\n\nº¼Æ®¾Ø³ÊÆ®´Â °í°´ ºĞµéÀÇ ÀÇ·Ú ¹°Ç°À» ÃÖÀûÀÇ °¡°İ¿¡ Á¦´ë·Î ¸¸µé¾îµå¸± ¼ö ÀÖµµ·Ï ³ë·ÂÇÏ°Ú½À´Ï´Ù.',
+            #             'message': 'ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\n\në³¼íŠ¸ì•¤ë„ˆíŠ¸ì— '+requestTitle +'ì˜ë¢°ë¥¼ ì£¼ì…”ì„œ ê°ì‚¬í•©ë‹ˆë‹¤.\n\nì €í¬ ë³¼íŠ¸ì•¤ë„ˆíŠ¸ ì„œë¹„ìŠ¤ê°€ ë¶€ì¡±í•œ ì ì´ë‚˜ ì¹­ì°¬í• ë§Œí•œ ì ì´ ìˆë‹¤ë©´ ì²¨ë¶€ëœ ë§í¬ì—ì„œ ë¦¬ë·°ë¥¼ ì‘ì„±í•´ì£¼ì„¸ìš”.\n\nê³ ê°ë‹˜ê»˜ì„œ ì£¼ì‹  ì†Œì¤‘í•œ ì˜ê²¬ í•˜ë‚˜í•˜ë‚˜ ê·€ê¸°ìš¸ì—¬ ë“£ê³  ë¶€ì¡±í•œ ì ì„ ê°œì„ í•˜ë„ë¡ í•˜ê² ìŠµë‹ˆë‹¤.\n\në§¤ë‹¬ ë¦¬ë·°ë¥¼ ì‘ì„±í•´ì£¼ì‹  ê³ ê°ë¶„ë“¤ ì¤‘ í•œ ë¶„ì„ ì„ ë°œí•˜ì—¬ ë¬´ë£Œ ëª¨ë¸ë§ ì„œë¹„ìŠ¤ë¥¼ ì œê³µí•˜ê³  ìˆìŠµë‹ˆë‹¤.\n\në³¼íŠ¸ì•¤ë„ˆíŠ¸ëŠ” ê³ ê° ë¶„ë“¤ì˜ ì˜ë¢° ë¬¼í’ˆì„ ìµœì ì˜ ê°€ê²©ì— ì œëŒ€ë¡œ ë§Œë“¤ì–´ë“œë¦´ ìˆ˜ ìˆë„ë¡ ë…¸ë ¥í•˜ê² ìŠµë‹ˆë‹¤.',
             #             'button': [
             #                 {
-            #                     'name': 'ÀÇ·ÚÀÛ¼ºÇÏ·¯°¡±â',
+            #                     'name': 'ì˜ë¢°ì‘ì„±í•˜ëŸ¬ê°€ê¸°',
             #                     'type': 'WL',
             #                     'url_mobile': 'https://www.boltnnut.com/',
             #                     'url_pc': 'https://www.boltnnut.com/'
@@ -488,10 +510,10 @@ class kakaotalk_send_response_msg():
                     'content': {
                         'at': {
                             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'send_response_message',
-                            'message': "¾È³çÇÏ¼¼¿ä {phone.username}´Ô.\n\n »ó´ã ¿äÃ»ÇÏ½Å "+requestTitle +"ÀÇ·Ú¿¡ ÀûÇÕÇÑ Á¦Á¶»ç°¡ ¹®ÀÇ »çÇ×¿¡ ´ëÇÑ ´ñ±ÛÀ» ´Ş¾ÆÁÖ¼Ì¾î¿ä.\n\n ´ñ±Û ³»¿ëÀ» È®ÀÎÇØº¸½Ã°í Ãß°¡·Î ±Ã±İÇÏ½Å »çÇ×ÀÌ ÀÖ´Ù¸é ÇØ´ç Á¦Á¶»ç¿ÍÀÇ ¼ÒÅëÀ» ÅëÇØ ¹®ÀÇÇØÁÖ¼¼¿ä.",
+                            'message': "ì•ˆë…•í•˜ì„¸ìš” {phone.username}ë‹˜.\n\n ìƒë‹´ ìš”ì²­í•˜ì‹  "+requestTitle +"ì˜ë¢°ì— ì í•©í•œ ì œì¡°ì‚¬ê°€ ë¬¸ì˜ ì‚¬í•­ì— ëŒ€í•œ ëŒ“ê¸€ì„ ë‹¬ì•„ì£¼ì…¨ì–´ìš”.\n\n ëŒ“ê¸€ ë‚´ìš©ì„ í™•ì¸í•´ë³´ì‹œê³  ì¶”ê°€ë¡œ ê¶ê¸ˆí•˜ì‹  ì‚¬í•­ì´ ìˆë‹¤ë©´ í•´ë‹¹ ì œì¡°ì‚¬ì™€ì˜ ì†Œí†µì„ í†µí•´ ë¬¸ì˜í•´ì£¼ì„¸ìš”.",
                             'button': [
                                     {
-                                    'name': '´ñ±Û È®ÀÎÇÏ±â',
+                                    'name': 'ëŒ“ê¸€ í™•ì¸í•˜ê¸°',
                                     'type': 'WL',
                                     'url_mobile': 'http://www.boltnnut.com',
                                     'url_pc': 'http://www.boltnnut.com'
@@ -521,10 +543,10 @@ class kakaotalk_send_msg_request_week():
                     'content': {
                         'at': {
                             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'send_message_after_week',
-                            'message': "¾È³çÇÏ¼¼¿ä {phone.username}´Ô.\n\n¿äÃ»ÇÏ½Å "+requestTitle+" »ó´ã¿¡ ¹®ÀÇ »çÇ×Àº ÃæºĞÈ÷ ÇØ°áµÇ¼Ì³ª¿ä?\n\nÁ¦Á¶»ç¿ÍÀÇ ¼ÒÅë °úÁ¤À» ÅëÇØ ÃæºĞÈ÷ ÇØ¼ÒµÇÁö ¾Ê¾Ò´Ù¸é º¼Æ®¾Ø³ÊÆ® Àü¹® ÄÁ¼³ÅÏÆ®¿¡°Ô »ó´ãÀ» ¿äÃ»ÇØº¸¼¼¿ä.\n\nÄÁ¼³ÅÏÆ®²²¼­ ¹®ÀÇ »çÇ×À» È®ÀÎÇÏ°í ÀûÇÕÇÑ ´äº¯À» µå¸± ¼ö ÀÖ½À´Ï´Ù.",
+                            'message': "ì•ˆë…•í•˜ì„¸ìš” {phone.username}ë‹˜.\n\nìš”ì²­í•˜ì‹  "+requestTitle+" ìƒë‹´ì— ë¬¸ì˜ ì‚¬í•­ì€ ì¶©ë¶„íˆ í•´ê²°ë˜ì…¨ë‚˜ìš”?\n\nì œì¡°ì‚¬ì™€ì˜ ì†Œí†µ ê³¼ì •ì„ í†µí•´ ì¶©ë¶„íˆ í•´ì†Œë˜ì§€ ì•Šì•˜ë‹¤ë©´ ë³¼íŠ¸ì•¤ë„ˆíŠ¸ ì „ë¬¸ ì»¨ì„¤í„´íŠ¸ì—ê²Œ ìƒë‹´ì„ ìš”ì²­í•´ë³´ì„¸ìš”.\n\nì»¨ì„¤í„´íŠ¸ê»˜ì„œ ë¬¸ì˜ ì‚¬í•­ì„ í™•ì¸í•˜ê³  ì í•©í•œ ë‹µë³€ì„ ë“œë¦´ ìˆ˜ ìˆìŠµë‹ˆë‹¤.",
                             'button': [
                                     {
-                                    'name': '»ó´ãÇÏ±â',
+                                    'name': 'ìƒë‹´í•˜ê¸°',
                                     'type': 'WL',
                                     'url_mobile': 'https://www.boltnnut.com/',
                                 }
@@ -552,7 +574,7 @@ class kakaotalk_send_msg_request_week():
 #                 'content': {
 #                     'at': {
 #                         'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'notice_partner',
-#                         'message': "¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\n"+requestTitle +"ÀÇ·Ú¿¡ ´ëÇÑ Ã¤ÆÃÀÌ ½ÃÀÛµÇ¾ú½À´Ï´Ù.\nÁØºñ°¡ µÇ¼ÌÀ¸¸é ½ÃÀÛÇØÁÖ¼¼¿ä.",
+#                         'message': "ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\n"+requestTitle +"ì˜ë¢°ì— ëŒ€í•œ ì±„íŒ…ì´ ì‹œì‘ë˜ì—ˆìŠµë‹ˆë‹¤.\nì¤€ë¹„ê°€ ë˜ì…¨ìœ¼ë©´ ì‹œì‘í•´ì£¼ì„¸ìš”.",
 #                     }
 #                 }
 #             }
@@ -572,13 +594,13 @@ class kakaotalk_send_msg_request_week():
 #                 'content': {
 #                     'at': {
 #                         'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'send_chat_alarm',
-#                         'message': "¾È³çÇÏ¼¼¿ä. º¼Æ®¾Ø³ÊÆ®ÀÔ´Ï´Ù.\nÃ¤ÆÃ¿¡ ´ëÇÑ ´äº¯ÀÌ µµÂøÇß½À´Ï´Ù.",
+#                         'message': "ì•ˆë…•í•˜ì„¸ìš”. ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì…ë‹ˆë‹¤.\nì±„íŒ…ì— ëŒ€í•œ ë‹µë³€ì´ ë„ì°©í–ˆìŠµë‹ˆë‹¤.",
 #                     }
 #                 }
 #             }
             
 class kakaotalk_send_msg_response():
-        # Á¦Á¶»çÀÇ Ã¤ÆÃ¿¡ ´äº¯À» ÇÏÁö ¾Ê°í 2ÀÏÀÌ Áö³­ °æ¿ì (ÀÇ·Ú´ç 1¹ø¸¸)
+        # ì œì¡°ì‚¬ì˜ ì±„íŒ…ì— ë‹µë³€ì„ í•˜ì§€ ì•Šê³  2ì¼ì´ ì§€ë‚œ ê²½ìš° (ì˜ë¢°ë‹¹ 1ë²ˆë§Œ)
         def send(phone_list, requestTitle, partner_name):
             for phone in phone_list:
                 token = KakaoToken.objects.get(id=1)
@@ -595,10 +617,10 @@ class kakaotalk_send_msg_response():
                     'content': {
                         'at': {
                             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'send_message_about_response',
-                            'message': "¾È³çÇÏ¼¼¿ä {phone.username}´Ô.\n\n"+requestTitle+" »ó´ã¿¡ ¸ÅÄªµÈ "+partner_name+"ºĞ²²¼­ ´äº¯À» ±â´Ù¸®°í ÀÖ½À´Ï´Ù.\n\n»ó´ãÀ» Á¾·áÇÏ°í ½ÍÀ¸½Ã´Ù¸é "+partner_name+"ºĞ²² ¾È³»ÇØÁÖ¼¼¿ä.",
+                            'message': "ì•ˆë…•í•˜ì„¸ìš” {phone.username}ë‹˜.\n\n"+requestTitle+" ìƒë‹´ì— ë§¤ì¹­ëœ "+partner_name+"ë¶„ê»˜ì„œ ë‹µë³€ì„ ê¸°ë‹¤ë¦¬ê³  ìˆìŠµë‹ˆë‹¤.\n\nìƒë‹´ì„ ì¢…ë£Œí•˜ê³  ì‹¶ìœ¼ì‹œë‹¤ë©´ "+partner_name+"ë¶„ê»˜ ì•ˆë‚´í•´ì£¼ì„¸ìš”.",
                             'button': [
                                     {
-                                    'name': '´äº¯ÇÏ·¯ °¡±â',
+                                    'name': 'ë‹µë³€í•˜ëŸ¬ ê°€ê¸°',
                                     'type': 'WL',
                                     'url_mobile': 'https://www.boltnnut.com/',
                                     'url_pc': 'https://www.boltnnut.com/'
@@ -608,7 +630,7 @@ class kakaotalk_send_msg_response():
                     }
                 }
 
-# ¼öÁ¤ ÈÄ
+# ìˆ˜ì • í›„
 # class kakaotalk_request_answer():
 #         def send(phone,requestTitle):
 #             token = KakaoToken.objects.get(id=1)
@@ -626,10 +648,10 @@ class kakaotalk_send_msg_response():
 #                     'at': {
 #                         'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98',
 #                         'templatecode': 'request',
-#                         'message': '¾È³çÇÏ¼¼¿ä.' + phone.username + '´Ô »ó´ã ¿äÃ»ÇÏ½Å' + requestTitle + '¿¡ ÀûÇÕÇÑ Á¦Á¶»ç°¡ ¹®ÀÇ »çÇ×¿¡ ´ëÇÑ ´ñ±ÛÀ» ´Ş¾Æ ÁÖ¼Ì¾î¿ä\n\n ´ñ±Û ³»¿ëÀ» È®ÀÎÇØº¸½Ã°í Ãß°¡·Î ±Ã±İÇÏ½Å »çÇ×ÀÌ ÀÖ´Ù¸é ÇØ´ç Á¦Á¶»ç¿ÍÀÇ ¼ÒÅëÀ» ÅëÇØ ¹®ÀÇÇØÁÖ¼¼¿ä',
+#                         'message': 'ì•ˆë…•í•˜ì„¸ìš”.' + phone.username + 'ë‹˜ ìƒë‹´ ìš”ì²­í•˜ì‹ ' + requestTitle + 'ì— ì í•©í•œ ì œì¡°ì‚¬ê°€ ë¬¸ì˜ ì‚¬í•­ì— ëŒ€í•œ ëŒ“ê¸€ì„ ë‹¬ì•„ ì£¼ì…¨ì–´ìš”\n\n ëŒ“ê¸€ ë‚´ìš©ì„ í™•ì¸í•´ë³´ì‹œê³  ì¶”ê°€ë¡œ ê¶ê¸ˆí•˜ì‹  ì‚¬í•­ì´ ìˆë‹¤ë©´ í•´ë‹¹ ì œì¡°ì‚¬ì™€ì˜ ì†Œí†µì„ í†µí•´ ë¬¸ì˜í•´ì£¼ì„¸ìš”',
 #                         'button': [
 #                             {
-#                                 'name': '´ñ±Û È®ÀÎÇÏ±â',
+#                                 'name': 'ëŒ“ê¸€ í™•ì¸í•˜ê¸°',
 #                                 'type': 'WL',
 #                                 'url_mobile': 'https://www.boltnnut.com/'',
 #                                 'url_pc': 'https://www.boltnnut.com/'
@@ -648,7 +670,7 @@ class kakaotalk_send_msg_response():
 
 class kakaotalk_send_answer_to_client():
     def send(phone, username, requestTitle):
-        #ÅäÅ« ¿äÃ»ÇÏ°í ÀúÀå
+        #í† í° ìš”ì²­í•˜ê³  ì €ì¥
         url = 'https://api.bizppurio.com/v1/token'
         headers = {
             'Content-type': 'application/json;charset=utf-8', 
@@ -664,7 +686,7 @@ class kakaotalk_send_answer_to_client():
         data.token = basicAccessToken
         data.save()
 
-        #ÅäÅ« °¡Á®¿Í¼­ api º¸³»±â
+        #í† í° ê°€ì ¸ì™€ì„œ api ë³´ë‚´ê¸°
         token = KakaoToken.objects.get(id=1)
         Authorization = token.token
         url = 'https://api.bizppurio.com/v3/message/'
@@ -678,10 +700,10 @@ class kakaotalk_send_answer_to_client():
                 'at': {
                     'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98',
                     'templatecode': 'send_answer_to_client',
-                    'message': '¾È³çÇÏ¼¼¿ä '+username+'´Ô.\n¿äÃ»ÇÏ½Å '+requestTitle+' »ó´ã¿¡ ÀûÇÕÇÑ Á¦Á¶»ç°¡ ¹®ÀÇÁÖ½Å »çÇ×¿¡ ´ëÇÑ ´äº¯À» Á¦¾ÈÁÖ¼Ì¾î¿ä.\n´äº¯ ³»¿ëÀ» È®ÀÎÇØº¸½Ã°í Ãß°¡·Î ±Ã±İÇÏ½Å »çÇ×Àº ÇØ´ç Á¦Á¶»ç¿ÍÀÇ ¼ÒÅëÀ» ÅëÇØ ¹®ÀÇÇØÁÖ¼¼¿ä.',
+                    'message': 'ì•ˆë…•í•˜ì„¸ìš” '+username+'ë‹˜.\nìš”ì²­í•˜ì‹  '+requestTitle+' ìƒë‹´ì— ì í•©í•œ ì œì¡°ì‚¬ê°€ ë¬¸ì˜ì£¼ì‹  ì‚¬í•­ì— ëŒ€í•œ ë‹µë³€ì„ ì œì•ˆì£¼ì…¨ì–´ìš”.\në‹µë³€ ë‚´ìš©ì„ í™•ì¸í•´ë³´ì‹œê³  ì¶”ê°€ë¡œ ê¶ê¸ˆí•˜ì‹  ì‚¬í•­ì€ í•´ë‹¹ ì œì¡°ì‚¬ì™€ì˜ ì†Œí†µì„ í†µí•´ ë¬¸ì˜í•´ì£¼ì„¸ìš”.',
                     'button': [
                         {
-                            'name': 'Á¦¾È¼­ È®ÀÎÇÏ±â',
+                            'name': 'ì œì•ˆì„œ í™•ì¸í•˜ê¸°',
                             'type': 'WL',
                             'url_mobile': 'https://www.boltnnut.com',
                             'url_pc': 'https://www.boltnnut.com' ,
@@ -704,7 +726,7 @@ class kakaotalk_send_answer_to_client():
 class kakaotalk_chat_text():
     def send(phone, requestTitle, partner_name, chat_content):
         
-        #ÅäÅ« ¿äÃ»ÇÏ°í ÀúÀå
+        #í† í° ìš”ì²­í•˜ê³  ì €ì¥
         url = 'https://api.bizppurio.com/v1/token'
         headers = {
             'Content-type': 'application/json;charset=utf-8', 
@@ -720,7 +742,7 @@ class kakaotalk_chat_text():
         data.token = basicAccessToken
         data.save()
         
-        #ÅäÅ« °¡Á®¿Í¼­ api º¸³»±â
+        #í† í° ê°€ì ¸ì™€ì„œ api ë³´ë‚´ê¸°
         token = KakaoToken.objects.get(id=1)
         Authorization = token.token
         url = 'https://api.bizppurio.com/v3/message'
@@ -734,10 +756,10 @@ class kakaotalk_chat_text():
                 'at': {
                     'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98',
                     'templatecode': 'send_chat_text',
-                    'message': requestTitle + ' »ó´ã¿¡ ¸ÅÄªµÈ ' + partner_name + '´ÔÀÌ ´ÙÀ½°ú °°ÀÌ ´äº¯À» ÁÖ¼Ì½À´Ï´Ù.\n\n' + chat_content,
+                    'message': requestTitle + ' ìƒë‹´ì— ë§¤ì¹­ëœ ' + partner_name + 'ë‹˜ì´ ë‹¤ìŒê³¼ ê°™ì´ ë‹µë³€ì„ ì£¼ì…¨ìŠµë‹ˆë‹¤.\n\n' + chat_content,
                     'button': [
                         {
-                            'name': '´äº¯ÇÏ·¯ °¡±â',
+                            'name': 'ë‹µë³€í•˜ëŸ¬ ê°€ê¸°',
                             'type': 'WL',
                             'url_mobile': 'https://www.boltnnut.com',
                             'url_pc': 'https://www.boltnnut.com',
@@ -753,7 +775,7 @@ class kakaotalk_chat_text():
 class kakaotalk_chat_file():
     def send(phone, requestTitle, partner_name, file):
         
-        #ÅäÅ« ¿äÃ»ÇÏ°í ÀúÀå
+        #í† í° ìš”ì²­í•˜ê³  ì €ì¥
         url = 'https://api.bizppurio.com/v1/token'
         headers = {
             'Content-type': 'application/json;charset=utf-8', 
@@ -769,7 +791,7 @@ class kakaotalk_chat_file():
         data.token = basicAccessToken
         data.save()
 
-        #ÅäÅ« °¡Á®¿Í¼­ api º¸³»±â
+        #í† í° ê°€ì ¸ì™€ì„œ api ë³´ë‚´ê¸°
         token = KakaoToken.objects.get(id=1)
         Authorization = token.token
         url = 'https://api.bizppurio.com/v3/message'
@@ -783,10 +805,10 @@ class kakaotalk_chat_file():
                 'at': {
                     'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98',
                     'templatecode': 'send_chat_file',
-                    'message': requestTitle + ' »ó´ã¿¡ ¸ÅÄªµÈ ' + partner_name + '´ÔÀÌ ' + file + ' ÆÄÀÏÀ» Àü´ŞÁÖ¼Ì½À´Ï´Ù.',
+                    'message': requestTitle + ' ìƒë‹´ì— ë§¤ì¹­ëœ ' + partner_name + 'ë‹˜ì´ ' + file + ' íŒŒì¼ì„ ì „ë‹¬ì£¼ì…¨ìŠµë‹ˆë‹¤.',
                     'button': [
                         {
-                            'name': 'È®ÀÎÇÏ·¯ °¡±â',
+                            'name': 'í™•ì¸í•˜ëŸ¬ ê°€ê¸°',
                             'type': 'WL',
                             'url_mobile': 'https://www.boltnnut.com',
                             'url_pc': 'https://www.boltnnut.com',
@@ -809,7 +831,7 @@ class jandi_webhook_answer():
             'Content-Type': 'application/json'
         }
         data = {
-            "body" : "[º¼Æ®¾Ø³ÊÆ®] "+clinetName+"´ÔÀÌ "+"<"+title+">"+"¿¡ ´ëÇÑ Á¦¾È¼­¸¦ »ı¼ºÇÏ¿´½À´Ï´Ù.",
+            "body" : "[ë³¼íŠ¸ì•¤ë„ˆíŠ¸] "+clinetName+"ë‹˜ì´ "+"<"+title+">"+"ì— ëŒ€í•œ ì œì•ˆì„œë¥¼ ìƒì„±í•˜ì˜€ìŠµë‹ˆë‹¤.",
             }
         response = requests.post(url, data=json.dumps(data), headers=headers)
         return response
@@ -822,7 +844,155 @@ class jandi_webhook_project():
             'Content-Type': 'application/json'
         }
         data = {
-            "body" : "[º¼Æ®¾Ø³ÊÆ®] " +clinetName+"´ÔÀÌ "+"<"+title+">"+" ÇÁ·ÎÁ§Æ®¸¦ »ı¼ºÇÏ¿´½À´Ï´Ù.",
+            "body" : "[ë³¼íŠ¸ì•¤ë„ˆíŠ¸] " +clinetName+"ë‹˜ì´ "+"<"+title+">"+" í”„ë¡œì íŠ¸ë¥¼ ìƒì„±í•˜ì˜€ìŠµë‹ˆë‹¤.",
             }
         response = requests.post(url, data=json.dumps(data), headers=headers)
         return response
+
+    def send_requestInfo(title,clinetName):
+        url = 'https://wh.jandi.com/connect-api/webhook/18069463/bf7dce120b1a85f9478b8460db6d07ad' 
+
+        headers = {
+            'Accept': 'application/vnd.tosslab.jandi-v2+json',
+            'Content-Type': 'application/json'
+        }
+        data = {
+            "body" : "[ë³¼íŠ¸ì•¤ë„ˆíŠ¸] " +clinetName+"ë‹˜ì´ "+"<"+title+">"+"  ì—…ì²´ ìˆ˜ë°° ê²¬ì ì´ ìƒì„±í•˜ì˜€ìŠµë‹ˆë‹¤.",
+            }
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+        return response
+
+
+class getIp():
+    def get(a,b):
+        x_forwarded_for = a
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = b
+
+        if ip == '211.196.18.140' or ip == '211.216.28.238' or ip =='211.196.18.225' or ip =='59.5.24.185' or ip =='39.125.32.19' or ip =='220.116.11.139' or ip =='46.165.250.77' or ip=='54.86.50.139' or ip=='218.155.155.121':
+            ip = '0.0.0.0'
+        
+        return ip
+
+
+
+class sendEmail():
+    def send(username):
+        recipient = [username]
+        sender = "boltnnut@boltnnut.com" # 
+        image_path = '/home/ubuntu/staging/boltnnut_platform/media/account/signUpGreeting.jpg'
+        image_name = Path(image_path).name
+        subject = "[ì˜¨ë¼ì¸ ì œì¡° í”Œë«í¼] ì „êµ­ ì œì¡°ì‚¬ ì •ë³´ ë‹¤ ìˆë‹¤, ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì— íšŒì› ê°€ì…ì´ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤."
+        text_message = f"{image_name}"
+        html_message = f"""
+        <!doctype html>
+            <html lang=en>
+                <head>
+                    <meta charset=utf-8>
+                    <title>Some title.</title>
+                </head>
+                <body>
+                    <h3>{subject}</h1>
+                    <p>
+                    {username}ë‹˜, ë³¼íŠ¸ì•¤ë„ˆíŠ¸ì— ê°€ì…í•´ ì£¼ì…”ì„œ ê°ì‚¬í•©ë‹ˆë‹¤.<br>
+                    <img style="width: 800px;" src='cid:{image_name}'/>
+                    </p>
+                </body>
+            </html>
+        """
+        email = EmailMultiAlternatives(subject=subject, body=text_message, from_email=sender, to=recipient)
+        if all([html_message,image_path,image_name]):
+            email.attach_alternative(html_message, "text/html")
+            email.content_subtype = 'html' 
+            email.mixed_subtype = 'related' 
+            with open(image_path, mode='rb') as f:
+                image = MIMEImage(f.read(),_subtype="jpg")
+                email.attach(image)
+                image.add_header('Content-ID', f"<{image_name}>")
+        email.send()
+
+
+class imgUpload():
+    def save():
+        path = '/Users/iyuchang/Downloads/ë³¸ì‚¬_ë¥˜ì±„ì˜_ë¼ë²¨ë§/'
+        file_list = os.listdir(path)
+        for i in file_list:
+            print(i)
+            if i != '.DS_Store':
+                uni1 = unicodedata.normalize('NFC',i)
+                partner = Partner.objects.filter(name=uni1)
+                if partner:
+                    newpath = path+i
+                    file_list = os.listdir(newpath)
+                    for j in file_list:
+                        j = unicodedata.normalize('NFC',j)
+                        if j != '.DS_Store':
+                            buffer = BytesIO()
+                            j_=j.split('.')
+                            if j_[-1] !='html' and j_[-1] !='PDF' and j_[-1]!='JFIF' and j_[-1]!='jfif':
+                                if j_[-1]=='pptx':
+                                    #pptx
+                                    pr=Presentation(newpath+'/'+j)
+                                    pr.save(buffer)
+                                    pptx_file = InMemoryUploadedFile(buffer, None, j, 'application/vnd.openxmlformats-officedocument.presentationml.presentation', sys.getsizeof(pr), None)
+                                    partner[0].file.save(j,pptx_file)
+
+                                elif j_[-1]=='pdf':
+                                    #pdf
+                                    file = open(newpath+'/'+j, 'rb')
+                                    pdf_file = InMemoryUploadedFile(file, None, j, 'application/pdf', sys.getsizeof(file), None)
+                                    partner[0].file.save(j,pdf_file)
+
+                                else:
+                                    #ì´ë¯¸ì§€
+                                    im=Image.open(newpath+'/'+j)
+                                    if j_[-1] == 'jpg' or j_[-1]=='JPG':
+                                        im=im.convert('RGB')
+                                        j_[-1]='jpeg'
+                                    im.save(buffer, j_[-1])
+                                    image_file = InMemoryUploadedFile(buffer, None, j, 'image/'+j_[-1], im.size, None)
+
+                                    Portfolio.objects.create(
+                                        partner = partner[0],
+                                        img_portfolio = image_file,
+                                        name = j_[0]
+                                    )
+
+
+    def fileupload():
+        path = '/Users/iyuchang/Downloads/ë³¸ì‚¬ë¶„ë°°.csv'
+        csv_file = pd.read_csv(path, error_bad_lines=False)
+        csv_file_values = csv_file.values
+        count = 600352
+
+        for row in csv_file_values:
+            if Partner.objects.filter(name=row[4]):
+                continue
+            else:
+                count += 1
+                city_name = City.objects.get(city = row[7])
+                category_middle_list = row[9].split(',')
+
+                user = User.objects.create(
+                    username = f'boltnnut{count}' + '@boltnnut.com',
+                    password = '1234',
+                    phone = row[1],
+                    type = 1,
+                )
+                
+                partner = Partner.objects.create(
+                    user = user,
+                    name = row[4],
+                    city = city_name,
+                    info_company = row[0],
+                    history = row[3],
+                    logo='null'
+                )
+                
+                for el in category_middle_list:
+                    develop_name = Develop.objects.filter(category = el)
+                    partner.category_middle.add(*develop_name)
+                    partner.save()
+                
