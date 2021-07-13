@@ -3,6 +3,7 @@ from django.utils.deconstruct import deconstructible
 
 from rest_framework.response import Response
 import datetime
+import io
 import os
 import random
 import string
@@ -28,9 +29,10 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import pandas as pd
 from pptx import Presentation
-import PyPDF2
-import chardet
 import unicodedata
+from google.oauth2 import service_account
+from google.cloud import vision
+
 
 
 
@@ -916,7 +918,7 @@ class sendEmail():
 
 class imgUpload():
     def save():
-        path = '/Users/iyuchang/Downloads/본사_류채영_라벨링/'
+        path = '/Users/iyuchang/Downloads/오솔찬/'
         file_list = os.listdir(path)
         for i in file_list:
             print(i)
@@ -995,4 +997,53 @@ class imgUpload():
                     develop_name = Develop.objects.filter(category = el)
                     partner.category_middle.add(*develop_name)
                     partner.save()
-                
+
+    def vision_api_test():
+        # 구글비전
+        credential_path = '/Users/iyuchang/Downloads/decent-destiny-319206-20c01e01bd7c.json'
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
+        client = vision.ImageAnnotatorClient()
+
+        # 경로
+        path = '/Users/iyuchang/Downloads/오솔찬/'
+        file_list = os.listdir(path)
+        for i in file_list:
+            if i !='.DS_Store':
+                uni1 = unicodedata.normalize('NFC',i)
+                x =Partner.objects.filter(name=uni1)
+                if x:
+                    newPath = path+i+'/'
+                    new_file_list = os.listdir(newPath)
+
+                    for j in new_file_list:
+                        j2 = j.split('.')[-1]
+                        if j !='.DS_Store' and j2!='pptx' and j2!='pdf' and j2!='PDF'and j2!='html'and j2!='JFIF'and j2!='jfif':
+                            with io.open(f'{newPath}{j}', 'rb') as f:
+                                content = f.read()
+                            image = vision.Image(content=content)
+                            response = client.label_detection(image=image)
+                            labels = response.label_annotations
+
+                            label_list = []
+                            label_score_list = []
+                            for label in labels:
+                                label_list.append(label.description)
+                                label_score_list.append(label.score)
+
+
+                            uni2 = unicodedata.normalize('NFC',j)
+                            j_ = uni2.split('.')
+                            if x[0].portfolio_set.filter(name=j_[0]):
+                                pf=x[0].portfolio_set.filter(name=j_[0])[0]
+                                for k in range(len(label_list)):
+                                    Label.objects.create(
+                                        portfolio = pf,
+                                        label=label_list[k],
+                                        score = label_score_list[k]
+                                    )
+
+                               
+
+
+
+

@@ -70,7 +70,6 @@ class CustomSearchFilter(filters.SearchFilter):
                               if j.partner.id not in partner_id:
                                     partner_id.append(j.partner.id)
             partner = Partner.objects.filter(id__in=partner_id).order_by('id').distinct()
-            partner2= Partner.objects.filter(name='서울기전').order_by('id').distinct()
             queryset = queryset.filter(reduce(operator.and_, conditions)).order_by('id').distinct()
             queryset = queryset.union(partner)
             if self.must_call_distinct(queryset, search_fields):
