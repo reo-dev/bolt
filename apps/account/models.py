@@ -18,7 +18,7 @@ def get_default_hash_id():
         user_id = 1
     return hashids.encode(user_id)
 
-# filename ÀÚµ¿ º¯°æ
+# filename ìë™ ë³€ê²½
 def partner_update_filename(instance, filename):
     ext = filename.split('.')[-1]
     now = datetime.datetime.now()
@@ -64,7 +64,7 @@ def structure_update_filename(instance, filename):
     
 # ------------------------------------------------------------------
 # Model   : User
-# Description : È¸¿ø ¸ğµ¨
+# Description : íšŒì› ëª¨ë¸
 # ------------------------------------------------------------------
 USER_TYPE = [
     (0, "CLIENT"),
@@ -72,17 +72,17 @@ USER_TYPE = [
 ]
 class User(AbstractUser):
 
-    # °øÅë ºÎºĞ
-    username = models.CharField('ÀÌ¸ŞÀÏ', max_length=256, default=get_default_hash_id, unique=True)
-    type = models.IntegerField('À¯ÀúÅ¸ÀÔ', default=0, choices=USER_TYPE)
+    # ê³µí†µ ë¶€ë¶„
+    username = models.CharField('ì´ë©”ì¼', max_length=256, default=get_default_hash_id, unique=True)
+    type = models.IntegerField('ìœ ì €íƒ€ì…', default=0, choices=USER_TYPE)
     password = models.CharField(max_length=256)
-    phone = models.CharField('ÈŞ´ëÆù ¹øÈ£', max_length=100, blank=True)
-    marketing = models.BooleanField('¸¶ÄÉÆÃµ¿ÀÇ¿©ºÎ', default=True, null=True)
-    last_activity = models.DateTimeField('ÃÖ±Ù È°µ¿', default = None, blank = True, null = True)
+    phone = models.CharField('íœ´ëŒ€í° ë²ˆí˜¸', max_length=100, blank=True)
+    marketing = models.BooleanField('ë§ˆì¼€íŒ…ë™ì˜ì—¬ë¶€', default=True, null=True)
+    last_activity = models.DateTimeField('ìµœê·¼ í™œë™', default = None, blank = True, null = True)
 
     class Meta:
-        verbose_name = '°¡ÀÔÀÚ'
-        verbose_name_plural = '°¡ÀÔÀÚ'
+        verbose_name = 'ê°€ì…ì'
+        verbose_name_plural = 'ê°€ì…ì'
         
     @property
     def is_update(self):
@@ -93,99 +93,118 @@ class User(AbstractUser):
 
 # ------------------------------------------------------------------
 # Model   : Client
-# Description : Å¬¶óÀÌ¾ğÆ® ¸ğµ¨
+# Description : í´ë¼ì´ì–¸íŠ¸ ëª¨ë¸
 # ------------------------------------------------------------------
 
 class Client(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='À¯Àú')
-    name = models.CharField('¾÷Ã¼¸í', max_length=256, null=True)
-    title = models.CharField('Á÷±Ş', max_length=256, null=True)
-    realName = models.CharField('ÀÌ¸§', max_length=256, null=True)
-    department = models.CharField('ºÎ¼­', max_length=256, null=True)
-    path = models.CharField('¹æ¹®°æ·Î', max_length=256, null=True)
-    business = models.CharField('¾÷Á¾', max_length=256, null=True)
-    email = models.CharField('ÀÌ¸ŞÀÏ', max_length=256, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='ìœ ì €')
+    name = models.CharField('ì—…ì²´ëª…', max_length=256, null=True)
+    title = models.CharField('ì§ê¸‰', max_length=256, null=True)
+    realName = models.CharField('ì´ë¦„', max_length=256, null=True)
+    department = models.CharField('ë¶€ì„œ', max_length=256, null=True)
+    path = models.CharField('ë°©ë¬¸ê²½ë¡œ', max_length=256, null=True)
+    business = models.CharField('ì—…ì¢…', max_length=256, null=True)
+    email = models.CharField('ì´ë©”ì¼', max_length=256, null=True)
     
     class Meta:
-        verbose_name = 'Å¬¶óÀÌ¾ğÆ®'
-        verbose_name_plural = 'Å¬¶óÀÌ¾ğÆ®'
+        verbose_name = 'í´ë¼ì´ì–¸íŠ¸'
+        verbose_name_plural = 'í´ë¼ì´ì–¸íŠ¸'
 
     def __str__(self):
         return str(self.user.username)
 
 # ------------------------------------------------------------------
 # Model   : Partner
-# Description : ÆÄÆ®³Ê ¸ğµ¨
+# Description : íŒŒíŠ¸ë„ˆ ëª¨ë¸
 # ------------------------------------------------------------------
 
 class Partner(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='À¯Àú')
-    name = models.CharField('¾÷Ã¼¸í', max_length=256, null=True)
-    logo = models.ImageField('·Î°í', upload_to=partner_update_filename, blank=True, null=True)
-    #Áö¿ª
-    city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name="½Ã/µµ", null=True)
-    info_company = models.TextField('È¸»ç¼Ò°³', blank=True, null=True)
-    history = models.TextField('ÁøÇàÇÑ Á¦Ç°µé', blank=True, null=True)
-    deal = models.TextField('ÁÖ¿ä°Å·¡Ã³', blank=True, null=True)
-    category_middle = models.ManyToManyField(Develop, verbose_name='ÀÇ·Ú°¡´ÉºĞ¾ß', related_name='category_middle')
-    #È¸¿ø°¡ÀÔ ½Ã ÆÄÀÏ
-    file = models.FileField('È¸»ç¼Ò°³ ¹× Æ÷ÅäÆú¸®¿ÀÆÄÀÏ', upload_to=partner_update_filename, blank=True, null=True)
-    resume = models.FileField('ÀÌ·Â¼­', upload_to=partner_update_filename, blank=True, null=True)
-    avg_score = models.DecimalField('Æò±ÕÁ¡¼ö', default=0, max_digits=5, decimal_places=2, null=True)
-    # ¾È½É¹øÈ£°¡ ¾Æ´Ñ ½ÇÁ¦ ÀüÈ­¹øÈ£
-    real_phone = models.CharField('½ÇÁ¦ ÈŞ´ëÆù ¹øÈ£', max_length=255, blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='ìœ ì €')
+    name = models.CharField('ì—…ì²´ëª…', max_length=256, null=True)
+    logo = models.ImageField('ë¡œê³ ', upload_to=partner_update_filename, blank=True, null=True)
+    #ì§€ì—­
+    city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name="ì‹œ/ë„", null=True)
+    info_company = models.TextField('íšŒì‚¬ì†Œê°œ', blank=True, null=True)
+    history = models.TextField('ì§„í–‰í•œ ì œí’ˆë“¤', blank=True, null=True)
+    deal = models.TextField('ì£¼ìš”ê±°ë˜ì²˜', blank=True, null=True)
+    category_middle = models.ManyToManyField(Develop, verbose_name='ì˜ë¢°ê°€ëŠ¥ë¶„ì•¼', related_name='category_middle')
+    #íšŒì›ê°€ì… ì‹œ íŒŒì¼
+    file = models.FileField('íšŒì‚¬ì†Œê°œ ë° í¬í† í´ë¦¬ì˜¤íŒŒì¼', upload_to=partner_update_filename, blank=True, null=True)
+    resume = models.FileField('ì´ë ¥ì„œ', upload_to=partner_update_filename, blank=True, null=True)
+    avg_score = models.DecimalField('í‰ê· ì ìˆ˜', default=0, max_digits=5, decimal_places=2, null=True)
+    # ì•ˆì‹¬ë²ˆí˜¸ê°€ ì•„ë‹Œ ì‹¤ì œ ì „í™”ë²ˆí˜¸
+    real_phone = models.CharField('ì‹¤ì œ íœ´ëŒ€í° ë²ˆí˜¸', max_length=255, blank=True, null=True)
+    idenfication_state = models.BooleanField('í™•ì¸ ê¸°ì—…', default=False)
+    chat_state = models.BooleanField('ì±„íŒ… ê°€ëŠ¥', default=False)
 
 
     class Meta:
-        verbose_name = 'ÆÄÆ®³Ê'
-        verbose_name_plural = 'ÆÄÆ®³Ê'
+        verbose_name = 'íŒŒíŠ¸ë„ˆ'
+        verbose_name_plural = 'íŒŒíŠ¸ë„ˆ'
 
     def __str__(self):
         return str(self.user.username)
 
 # ------------------------------------------------------------------
 # Model   : Portfolio
-# Description : Æ÷Æ®Æú¸®¿À ¸ğµ¨
+# Description : í¬íŠ¸í´ë¦¬ì˜¤ ëª¨ë¸
 # ------------------------------------------------------------------
 class Portfolio(models.Model):
-    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="ÆÄÆ®³Ê", null=True)
-    img_portfolio = models.ImageField('Æ÷ÅäÆú¸®¿À ÀÌ¹ÌÁö', upload_to=portfolio_update_filename, null=True)
-    is_main = models.BooleanField('¸ŞÀÎ ¿©ºÎ', default=False)
+    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="íŒŒíŠ¸ë„ˆ", null=True)
+    name = models.CharField('ì´ë¯¸ì§€ ëª…', max_length=256, null=True)
+    img_portfolio = models.ImageField('í¬í† í´ë¦¬ì˜¤ ì´ë¯¸ì§€', upload_to=portfolio_update_filename, null=True)
+    is_main = models.BooleanField('ë©”ì¸ ì—¬ë¶€', default=False)
 
     class Meta:
-        verbose_name = '     Æ÷Æ®Æú¸®¿À'
-        verbose_name_plural = '     Æ÷Æ®Æú¸®¿À'
+        verbose_name = 'íŒŒíŠ¸ë„ˆ ì œì‘ ì œí’ˆ'
+        verbose_name_plural = 'íŒŒíŠ¸ë„ˆ ì œì‘ ì œí’ˆ'
 
     def __str__(self):
-        return str(self.partner.name) + " Æ÷Æ®Æú¸®¿À"
+        return str(self.partner.name) + " íŒŒíŠ¸ë„ˆ ì œì‘ ì œí’ˆ"
+
+# ------------------------------------------------------------------
+# Model   : Label
+# Description : í¬íŠ¸í´ë¦¬ì˜¤ ëª¨ë¸
+# ------------------------------------------------------------------
+class Label(models.Model):
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, verbose_name="íŒŒíŠ¸ë„ˆ ì œì‘ ì œí’ˆ ë¼ë²¨",related_name='ë¼ë²¨', null=True)
+    label = models.CharField('ì´ë¯¸ì§€ ëª…', max_length=256, null=True)
+    score = models.FloatField('ìœ ì‚¬ë„', default=0,null=True )
+
+    class Meta:
+        verbose_name = 'ë¼ë²¨'
+        verbose_name_plural = 'ë¼ë²¨'
+
+    def __str__(self):
+        return str(self.label)
         
 
 # ------------------------------------------------------------------
 # Model   : Path
-# Description : ¹æ¹®°æ·Î ÀúÀå ¸ğµ¨
+# Description : ë°©ë¬¸ê²½ë¡œ ì €ì¥ ëª¨ë¸
 # ------------------------------------------------------------------
 class Path(models.Model):
-    path = models.CharField('¹æ¹®°æ·Î', max_length=256, null=True)
+    path = models.CharField('ë°©ë¬¸ê²½ë¡œ', max_length=256, null=True)
 
 
     class Meta:
-        verbose_name = '¹æ¹®°æ·Î'
-        verbose_name_plural = '¹æ¹®°æ·Î'
+        verbose_name = 'ë°©ë¬¸ê²½ë¡œ'
+        verbose_name_plural = 'ë°©ë¬¸ê²½ë¡œ'
 
     def __str__(self):
         return str(self.path)
 
 # ------------------------------------------------------------------
 # Model   : Busincess
-# Description : ¾÷Á¾ ·Î±× ÀúÀå ¸ğµ¨
+# Description : ì—…ì¢… ë¡œê·¸ ì €ì¥ ëª¨ë¸
 # ------------------------------------------------------------------
 class Business(models.Model):
-    business = models.CharField('¾÷Á¾', max_length=256, null=True)
+    business = models.CharField('ì—…ì¢…', max_length=256, null=True)
 
 
     class Meta:
-        verbose_name = '¾÷Á¾'
-        verbose_name_plural = '¾÷Á¾'
+        verbose_name = 'ì—…ì¢…'
+        verbose_name_plural = 'ì—…ì¢…'
 
     def __str__(self):
         return str(self.business)
@@ -193,62 +212,99 @@ class Business(models.Model):
 
 # ------------------------------------------------------------------
 # Model   : Partner Review
-# Description : ÆÄÆ®³Ê ¸®ºä Å×ÀÌºí
+# Description : íŒŒíŠ¸ë„ˆ ë¦¬ë·° í…Œì´ë¸”
 # ------------------------------------------------------------------
-REVIEW_TYPE = [
-    (1, "¸Å¿ì ºÒ¸¸Á·"),
-    (2, "ºÒ¸¸Á·"),
-    (3, "º¸Åë"),
-    (4, "¸¸Á·"),
-    (5, "¸Å¿ì ¸¸Á·"),
-]
-class PartnerReview(models.Model):
+# REVIEW_TYPE = [
+#     (1, "ë§¤ìš° ë¶ˆë§Œì¡±"),
+#     (2, "ë¶ˆë§Œì¡±"),
+#     (3, "ë³´í†µ"),
+#     (4, "ë§Œì¡±"),
+#     (5, "ë§¤ìš° ë§Œì¡±"),
+# ]
+# class PartnerReview(models.Model):
 
-    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="ÆÄÆ®³Ê", null=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Å¬¶óÀÌ¾ğÆ®", null=True)
-    score = models.IntegerField('Á¡¼ö', default=0, choices=REVIEW_TYPE)
-    content = models.CharField('ÄÁÅÙÃ÷', max_length=256, null=True)
+#     partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="íŒŒíŠ¸ë„ˆ", null=True)
+#     client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="í´ë¼ì´ì–¸íŠ¸", null=True)
+#     score = models.IntegerField('ì ìˆ˜', default=0, choices=REVIEW_TYPE)
+#     content = models.CharField('ì»¨í…ì¸ ', max_length=256, null=True)
+
+#     class Meta:
+#         verbose_name = 'íŒŒíŠ¸ë„ˆ ë¦¬ë·°'
+#         verbose_name_plural = 'íŒŒíŠ¸ë„ˆ ë¦¬ë·°'
+
+#     def __str__(self):
+#         return str(self.score)
+
+class PartnerReview(models.Model):
+    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="íŒŒíŠ¸ë„ˆ", null=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="í´ë¼ì´ì–¸íŠ¸", null=True)
+    projectname = models.CharField('í”„ë¡œì íŠ¸ ì´ë¦„', max_length=256, null=True)
+    consult_score = models.IntegerField('ì ìˆ˜', default=0)
+    kindness_score = models.IntegerField('ì ìˆ˜', default=0)
+    communication_score = models.IntegerField('ì ìˆ˜', default=0)
+    profession_score = models.IntegerField('ì ìˆ˜', default=0)
+    content = models.TextField('ë¦¬ë·°ë‚´ìš©', blank=True, null=True)
+    new_partner = models.IntegerField('ìƒˆë¡œìš´ ì œì¡°ì‚¬', null=True)
+    partner_name = models.CharField('ìƒˆë¡œìš´ ì œì¡°ì‚¬ ì´ë¦„', max_length=256, null=True)
+    date = models.CharField('ë¦¬ë·° ì‘ì„± ì‹œê°„', max_length=256, null=True)
 
     class Meta:
-        verbose_name = 'ÆÄÆ®³Ê ¸®ºä'
-        verbose_name_plural = 'ÆÄÆ®³Ê ¸®ºä'
+        verbose_name = 'íŒŒíŠ¸ë„ˆ ë¦¬ë·°'
+        verbose_name_plural = 'íŒŒíŠ¸ë„ˆ ë¦¬ë·°'
 
-    def __str__(self):
-        return str(self.score)
+
+
+
 
 # ------------------------------------------------------------------
 # Model   : Partner Review_temp
-# Description : ÆÄÆ®³Ê ÀÓ½Ã ¸®ºä Å×ÀÌºí : ¸®ºä ¹Ş±â¸¦ À§ÇÑ ÀÓ½Ã ³»¿ë
+# Description : íŒŒíŠ¸ë„ˆ ì„ì‹œ ë¦¬ë·° í…Œì´ë¸” : ë¦¬ë·° ë°›ê¸°ë¥¼ ìœ„í•œ ì„ì‹œ ë‚´ìš©
 # ------------------------------------------------------------------
 REVIEW_TYPE = [
-    (1, "¸Å¿ì ºÒ¸¸Á·"),
-    (2, "ºÒ¸¸Á·"),
-    (3, "º¸Åë"),
-    (4, "¸¸Á·"),
-    (5, "¸Å¿ì ¸¸Á·"),
+    (1, "ë§¤ìš° ë¶ˆë§Œì¡±"),
+    (2, "ë¶ˆë§Œì¡±"),
+    (3, "ë³´í†µ"),
+    (4, "ë§Œì¡±"),
+    (5, "ë§¤ìš° ë§Œì¡±"),
 ]
 class PartnerReviewTemp(models.Model):
 
-    partnername = models.CharField('¾÷Ã¼¸í', max_length=256, null=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Å¬¶óÀÌ¾ğÆ®", null=True)
-    score = models.IntegerField('Á¡¼ö', default=0, choices=REVIEW_TYPE)
-    content = models.CharField('ÄÁÅÙÃ÷', max_length=256, null=True)
+    partnername = models.CharField('ì—…ì²´ëª…', max_length=256, null=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="í´ë¼ì´ì–¸íŠ¸", null=True)
+    score = models.IntegerField('ì ìˆ˜', default=0, choices=REVIEW_TYPE)
+    content = models.CharField('ì»¨í…ì¸ ', max_length=256, null=True)
 
     class Meta:
-        verbose_name = 'ÆÄÆ®³Ê ÀÓ½Ã ¸®ºä'
-        verbose_name_plural = 'ÆÄÆ®³Ê ÀÓ½Ã ¸®ºä'
+        verbose_name = 'íŒŒíŠ¸ë„ˆ ì„ì‹œ ë¦¬ë·°'
+        verbose_name_plural = 'íŒŒíŠ¸ë„ˆ ì„ì‹œ ë¦¬ë·°'
 
     def __str__(self):
         return str(self.score)
 
 class CsvFileUpload(models.Model):
-    filename = models.CharField("ÆÄÀÏÀÌ¸§", max_length=256, null=True)
-    partner_info_file = models.FileField('ÆÄÆ®³ÊÁ¤º¸ ÆÄÀÏ',upload_to=partner_update_filename,max_length=255, blank=True, null=True)
-    portfolio_file = models.FileField('Æ÷Æ®Æú¸®¿À ÆÄÀÏ',upload_to=partner_update_filename,max_length=255, blank=True, null=True)
+    filename = models.CharField("íŒŒì¼ì´ë¦„", max_length=256, null=True)
+    partner_info_file = models.FileField('íŒŒíŠ¸ë„ˆì •ë³´ íŒŒì¼',upload_to=partner_update_filename,max_length=255, blank=True, null=True)
+    portfolio_file = models.FileField('í¬íŠ¸í´ë¦¬ì˜¤ íŒŒì¼',upload_to=partner_update_filename,max_length=255, blank=True, null=True)
 
     class Meta:
-        verbose_name = 'ÆÄÀÏÀÌ¸§'
-        verbose_name_plural = 'ÆÄÀÏÀÌ¸§'
+        verbose_name = 'íŒŒì¼ì´ë¦„'
+        verbose_name_plural = 'íŒŒì¼ì´ë¦„'
 
     def __str__(self):
         return str(self.filename)
+
+# ------------------------------------------------------------------
+# Model   : Bookmark
+# Description : í´ë¼ì´ì–¸íŠ¸ ê´€ì‹¬íŒŒíŠ¸ë„ˆ ì €ì¥
+# ------------------------------------------------------------------
+class Bookmark(models.Model):
+    client =  models.OneToOneField(Client, on_delete=models.CASCADE, verbose_name='í´ë¼ì´ì–¸íŠ¸')
+    bookmark_partner = models.OneToOneField(Partner, on_delete=models.CASCADE, verbose_name='ê´€ì‹¬ ê¸°ì—…')
+
+
+    class Meta:
+        verbose_name = 'ê´€ì‹¬ íŒŒíŠ¸ë„ˆ'
+        verbose_name_plural = 'ê´€ì‹¬ íŒŒíŠ¸ë„ˆ'
+
+    def __str__(self):
+        return str(self.bookmark_partner)
