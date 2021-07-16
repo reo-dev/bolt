@@ -1042,7 +1042,46 @@ class imgUpload():
                                         score = label_score_list[k]
                                     )
 
-                               
+
+
+
+class test():
+    def test():
+        # input_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_factory'
+        # output_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_factory/result.csv' 
+        input_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_rnd'
+        output_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_rnd/result.csv' 
+        allFile_list = glob.glob(os.path.join(input_file, 'href_*')) 
+        allData = [] 
+        for file in allFile_list:
+            df = pd.read_csv(file,index_col = 0, encoding='CP949') 
+            x = df['href'].str.split('/').str[2]
+            df['href']=x
+            x = df['href'].str.contains('kbank|industryland|seniormaeil|medicaltimes|koreanair|lotte|ujnews|jobplanet|chungbuk|www.donga.com|hankookilbo|jbtp|dcinside|incruit|jbcc|twitter|google|jobkorea|linkedin|cafe24|partsgo|life114|sentry|www.xn--hy1b74g2uem0k.xn--3e0b707e|tachyonnews|daiso|okkorea|slideshare|musinsa|icpart|data.go.kr|hangame|vymaps|coupang|fishinggroup|thingoolmarket|hotels|etoday|scourt|indeed|m.post.naver.comjhealthmedia|ecomedia| music.bugs.co.kr|reportshop|cscamera|michelin|joongang|apps.apple.com|incheon|pikicast|recruittimes|dailymedi|dobong|costco|susansijang|busaninnews|mail.kldc.co.kr|metroseoul|.png|rockwellautomation|wikipedia|post.naver.com|koreamg|jmagazine|cine21|earticle|foodb2b|coffeebann|rocketpunch|paxnetnews|softpowerup|pinterest|korean.dict.naver.com|hyundaicard|sisamagazine|jbroot|facebook|ebn.co.kr|melon|fashionn.com|coffeejob|shopping|lotterentacar|daangn|weeklytrade|kreport|bizkorea|fisheco|kaist|theteams|www.jeju.go.kr|youtub|techbiz|ticketlink|nett.kr|bizinfo|busan|band.us|presidentmedia|boardlife|airbnb|Infostockdaily|coolenjoy|ulsankyocharo|dorojuso|trello|www.wowtv.co.kr|femiwiki|instagram|wikitree|auction|chosun|shinailbo|bithumb|shop.cables.co.kr|happycampus|shopma|alldream|print.or.kr|g2b|gamejob|korea724|www.quest.comwww.cj.net|ommall|najuwork|danawa|opensalary|saramin|gongjangbang|hankyung|hancommds|tourbiz|career|worker.co.kr|yeogie|kosha|cctoday|kisreport|sportsseoul|wadiz|aladin|mss.go.kr|navimro|samsung|anjunj|krmcia|misumi|aving|thethegangsa|kakamuka|businesskoreadiscover-jeju|bizk.co.kr|boannews.com|bmw-motorrad|yes24|lfmall|ssg.com|daara|coupongil|edaily|hmgjournal|mangoplate|ssg|weeklypeople|tumblbug|store114|make24|lottecinema|fpost|www.seoul.co.krbusinesspost|tmon|wemakeprice|todayhumor|law.go.kr|bizno|pharmnews|ulsanpress|samcheok|broofa|dgeplus|gsshop|e-name|coupang.com|namu.wiki|somemap|apt4|forum.38.co.kr| kr.hotels.com|wanted|ebooth|blog.daum.net|seouljobs|collector|headlinejejuthefirstmedia|www.jejusori.net|11st|netflix|jobaba|happycampus|booking|the114|guyweb|yna.co.kr|cosinkorea|lotteon|allthatcompany|kakao.com|blog|cunews|ksilbbrunch|honam|hansolhomedeco|juso.app|moneypie|gmarket|sandan114|place.naver|news|dailian.co.kr|wix|reportworld|glowpick|tistory|kovwa|storefarm|catch|Wikipedia|megastudy|bizok.incheon.go.kr|kosis|myrealtrip|soco.seoul.go.kr|babosarang|interpark|hmall|114.co.kr|sedaily|newswire|jroot|databasesets|findjob|jejulavawater|sisanewstime|job.seoul.go.kr|weather.com|kookje|hanryeotoday|m.cafe.daum.net|campustown|yeogienews|redcross|anewsa|cafeshow|thesegye|e-jlmaeil|ymdaily|naver|daum|apple|dictionary|go.kr|.gov|amazon|.org|.edu|.or.kr|hackers|.ac.kr')
+            allData.append(df[~x].drop_duplicates(['href']))
+
+        dataCombine = pd.concat(allData, axis=0, ignore_index=True) 
+        dataCombine.to_csv(output_file,encoding='CP949', index=True) 
+
+
+        input_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기' 
+        output_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/email_result1.csv'
+        input_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_rnd'
+        output_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_rnd/result1.csv' 
+        input_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_factory'
+        output_file = '/Users/iyuchang/Downloads/전국제조업체다알아버리기/hrefs_factory/result12.csv' 
+        allFile_list = glob.glob(os.path.join(input_file, 'factory_result_95746.csv')) 
+        allData = [] 
+        for file in allFile_list:
+            df = pd.read_csv(file,index_col = 0) 
+            x = df['name'].str.contains('건설|컨설팅|공단|협회|여행|캠핑|일보|물류')
+            allData.append(df[~x])
+
+        dataCombine = pd.concat(allData, axis=0, ignore_index=True) 
+        print(len(dataCombine.index))
+        dataCombine.to_csv(output_file,index=True) 
+
+                                    
 
 
 
