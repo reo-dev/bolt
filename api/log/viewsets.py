@@ -17,6 +17,17 @@ from rest_framework.response import Response
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 from elasticsearch import Elasticsearch  
+import requests
+
+
+
+
+
+import pprint
+import requests
+from lxml import etree
+from argparse import ArgumentParser
+import sys
 
 
 
@@ -62,14 +73,25 @@ class AccessLogViewSet (viewsets.ModelViewSet):
         # imgUpload.save()
         # imgUpload.fileupload()
         # elastic.send()
-        
+        qweqw='금속'
+        params = {'output':'toolbar','q':qweqw}
+        a = requests.get('https://suggestqueries.google.com/complete/search',params=params)
+        print(a.url)
+        root = etree.XML(a.text)
+        sugs = root.xpath('//suggestion')
+        sugstrs = [s.get('data') for s in sugs]
+
+    
+        y = ' '.join(sugstrs)
+        print(y)
         es = Elasticsearch([{'host':'localhost','port':'9200'}])
-        docs = es.search(
-            index='test',
+        partner = es.search(
+            index='partner-2021.07.200',
             body={
+                'size':10000,
                 "query": {
                     "multi_match": {
-                        "query": '볼트',
+                        "query": y,
                         "fields": [
                             "name", 
                             "info_company"
@@ -77,13 +99,34 @@ class AccessLogViewSet (viewsets.ModelViewSet):
                     }
                 }
             })
+        portfolio = es.search(
+            index='portfolio-2021.07.200',
+            body={
+                'size':10000,
+                "query": {
+                    "multi_match": {
+                        "query": y,
+                        "fields": [
+                            "name"
+                        ]
+                    }
+                }
+            })
         
-        print('hello2',docs)
-
         data_list = []
-        for data in docs['hits']['hits']:
+        for data in partner['hits']['hits']:
             data_list.append(data.get('_source'))
-        print('hello3',data_list[0])
+        print('hello3',data_list[0],len(data_list))
+
+        data_list2 = []
+        for data in portfolio['hits']['hits']:
+            data_list2.append(data.get('_source'))
+        print('hello3',data_list2[0],len(data_list2))
+        portfolioId =[]
+        for i in data_list2:
+            portfolioId.append(i["partner_id"])
+        print(len(list(set(portfolioId))))
+        
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
