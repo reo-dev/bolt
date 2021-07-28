@@ -71,9 +71,11 @@ class AccessLogViewSet (viewsets.ModelViewSet):
         # postDayLog()
         # postUserLog()
         # imgUpload.save()
+        # imgUpload.remove()
+        # imgUpload.googleUpload()
         # imgUpload.fileupload()
         # elastic.send()
-        qweqw='금속'
+        qweqw='bolt'
         params = {'output':'toolbar','q':qweqw}
         a = requests.get('https://suggestqueries.google.com/complete/search',params=params)
         print(a.url)
@@ -84,48 +86,54 @@ class AccessLogViewSet (viewsets.ModelViewSet):
     
         y = ' '.join(sugstrs)
         print(y)
-        es = Elasticsearch([{'host':'localhost','port':'9200'}])
+        es = Elasticsearch("http://localhost:9200", timeout=100, max_retries=10, retry_on_timeout=True)
         partner = es.search(
-            index='partner-2021.07.200',
+            index='partner-2',
             body={
                 'size':10000,
                 "query": {
                     "multi_match": {
                         "query": y,
                         "fields": [
-                            "name", 
-                            "info_company"
+                            "name.english_field",
+                            "info_company.english_field",
+                            "info_company.korean_field"
+                            "name.korean_field"
                         ]
+
                     }
                 }
             })
-        portfolio = es.search(
-            index='portfolio-2021.07.200',
-            body={
-                'size':10000,
-                "query": {
-                    "multi_match": {
-                        "query": y,
-                        "fields": [
-                            "name"
-                        ]
-                    }
-                }
-            })
+
+        print(partner)
+        # portfolio = es.search(
+        #     index='port-5',
+        #     body={
+        #         'size':10000,
+        #         "query": {
+        #             "multi_match": {
+        #                 "query": y,
+        #                 "fields": [
+        #                     "name"
+        #                 ]
+        #             }
+        #         }
+        #     })
+        # print(portfolio)
         
         data_list = []
         for data in partner['hits']['hits']:
             data_list.append(data.get('_source'))
         print('hello3',data_list[0],len(data_list))
 
-        data_list2 = []
-        for data in portfolio['hits']['hits']:
-            data_list2.append(data.get('_source'))
-        print('hello3',data_list2[0],len(data_list2))
-        portfolioId =[]
-        for i in data_list2:
-            portfolioId.append(i["partner_id"])
-        print(len(list(set(portfolioId))))
+        # data_list2 = []
+        # for data in portfolio['hits']['hits']:
+        #     data_list2.append(data.get('_source'))
+        # print('hello3',data_list2[0],len(data_list2))
+        # portfolioId =[]
+        # for i in data_list2:
+        #     portfolioId.append(i["partner_id"])
+        # print(len(list(set(portfolioId))))
         
 
         serializer = self.get_serializer(data=request.data)
