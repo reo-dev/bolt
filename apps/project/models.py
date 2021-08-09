@@ -3,30 +3,37 @@ import os, datetime, uuid
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
+from django_filters.utils import verbose_field_name
 from apps.category.models import *
 from apps.account.models import *
 from typing import TYPE_CHECKING
-
 from ckeditor_uploader.fields import RichTextUploadingField
-
 from hashids import Hashids
 from django.core.validators import MaxValueValidator
-
-#½Ã°£ °ü·Ã ÇÔ¼ö
+#ì‹œê°„ ê´€ë ¨ í•¨ìˆ˜
 from django.utils import timezone
 from datetime import date
+
+import boto3
 
 def project_update_filename(instance, filename):
     ext = filename.split('.')[-1]
     now = datetime.datetime.now()
     path = "project/" + str(now.year) + "/" + str(now.month) + "/" + str(now.day)
-    format = uuid.uuid4().hex + "_project" + "." + ext
+    format = filename
     return os.path.join(path, format)
 
 def request_update_filename(instance, filename):
     ext = filename.split('.')[-1]
     now = datetime.datetime.now()
     path = "request/" + str(now.year) + "/" + str(now.month) + "/" + str(now.day)
+    format = filename
+    return os.path.join(path, format)
+
+def requestInfo_update_filename(instance, filename):
+    ext = filename.split('.')[-1]
+    now = datetime.datetime.now()
+    path = "requestinfo/" + str(now.year) + "/" + str(now.month) + "/" + str(now.day)
     format = filename
     return os.path.join(path, format)
 
@@ -51,245 +58,378 @@ def time():
 
 # ------------------------------------------------------------------
 # Model   : ProjectStatus
-# Description : ÇÁ·ÎÁ§Æ® »óÅÂ ¸ğµ¨ : ÇÁ·ÎÁ§Æ®ÀÇ ÇöÀç »óÅÂ(°è¾à Áß µî)À» Ã¼Å©ÇÏ±â À§ÇÑ ¸ğµ¨·Î admin °ü¸®¸¦ À§ÇØ »ç¿ëµÊ 
+# Description : í”„ë¡œì íŠ¸ ìƒíƒœ ëª¨ë¸ : í”„ë¡œì íŠ¸ì˜ í˜„ì¬ ìƒíƒœ(ê³„ì•½ ì¤‘ ë“±)ì„ ì²´í¬í•˜ê¸° ìœ„í•œ ëª¨ë¸ë¡œ admin ê´€ë¦¬ë¥¼ ìœ„í•´ ì‚¬ìš©ë¨ 
 # ------------------------------------------------------------------
 
 class ProjectStatus(models.Model):
-    name = models.CharField('»óÈ²',max_length =256)
+    name = models.CharField('ìƒí™©',max_length =256)
 
     class Meta:
-        verbose_name = '     ÇÁ·ÎÁ§Æ®ÁøÇà»óÈ²'
-        verbose_name_plural = '     ÇÁ·ÎÁ§Æ®ÁøÇà»óÈ²'
+        verbose_name = '     í”„ë¡œì íŠ¸ì§„í–‰ìƒí™©'
+        verbose_name_plural = '     í”„ë¡œì íŠ¸ì§„í–‰ìƒí™©'
 
     def __str__(self):
         return str(self.name)
         
 # ------------------------------------------------------------------
 # Model   : Manager
-# Description : ÇÁ·ÎÁ§Æ® ´ã´çÀÚ ¸ğµ¨ : ÇÁ·ÎÁ§Æ®ÀÇ ´ã´çÀÚ¸¦ Ã¼Å©ÇÏ±â À§ÇÑ ¸ğµ¨·Î admin °ü¸®¸¦ À§ÇØ »ç¿ëµÊ 
+# Description : í”„ë¡œì íŠ¸ ë‹´ë‹¹ì ëª¨ë¸ : í”„ë¡œì íŠ¸ì˜ ë‹´ë‹¹ìë¥¼ ì²´í¬í•˜ê¸° ìœ„í•œ ëª¨ë¸ë¡œ admin ê´€ë¦¬ë¥¼ ìœ„í•´ ì‚¬ìš©ë¨ 
 # ------------------------------------------------------------------
 
 class Manager(models.Model):
-    name = models.CharField('¸Å´ÏÀú',max_length=150)
+    name = models.CharField('ë§¤ë‹ˆì €',max_length=150,null=True,blank=True)
 
     class Meta:
-        verbose_name = '     ÇÁ·ÎÁ§Æ®´ã´çÀÚ'
-        verbose_name_plural = '     ÇÁ·ÎÁ§Æ®´ã´çÀÚ'
+        verbose_name = '     í”„ë¡œì íŠ¸ë‹´ë‹¹ì'
+        verbose_name_plural = '     í”„ë¡œì íŠ¸ë‹´ë‹¹ì'
 
     def __str__(self):
         return str(self.name)
         
 # ------------------------------------------------------------------
 # Model   : Project
-# Description : ÇÁ·ÎÁ§Æ® ¸ğµ¨ : ÇÁ·ÎÁ§Æ®¿¡ °ü·ÃµÈ Á¤º¸µéÀ» ´ã°í ÀÖ°í ÇÏÀ§ ¸ğµ¨·Î request(ÀÇ·Ú¼­)¿Í answer(Á¦¾È¼­)¸¦ »ç¿ëÇÏ°í ÀÖÀ½
+# Description : í”„ë¡œì íŠ¸ ëª¨ë¸ : í”„ë¡œì íŠ¸ì— ê´€ë ¨ëœ ì •ë³´ë“¤ì„ ë‹´ê³  ìˆê³  í•˜ìœ„ ëª¨ë¸ë¡œ request(ì˜ë¢°ì„œ)ì™€ answer(ì œì•ˆì„œ)ë¥¼ ì‚¬ìš©í•˜ê³  ìˆìŒ
 # ------------------------------------------------------------------
 class Project(models.Model):
 
     PROGRESS = [
-    ('¸ğÁıÁß', "¸ğÁıÁß"),
-    ('¸ğÁıÁ¾·á' ,"¸ğÁıÁ¾·á"),
+    ('ëª¨ì§‘ì¤‘', "ëª¨ì§‘ì¤‘"),
+    ('ëª¨ì§‘ì¢…ë£Œ' ,"ëª¨ì§‘ì¢…ë£Œ"),
     ]
 
     TRANSFER = [
-    ('¾Æ´Ï¿À', '¾Æ´Ï¿À'),
-    ('¼±±İÀÔ±İ', '¼±±İÀÔ±İ'),
-    ('¿Ï³³', '¿Ï³³'),
+    ('ì•„ë‹ˆì˜¤', 'ì•„ë‹ˆì˜¤'),
+    ('ì„ ê¸ˆ', 'ì„ ê¸ˆ'),
+    ('ì¤‘ë„ê¸ˆ', 'ì¤‘ë„ê¸ˆ'),
+    ('ì™„ë‚©', 'ì™„ë‚©'),
     ]
 
     STEP = [
-        ('Á¤º¸ÀÔ·Â', 'Á¤º¸ÀÔ·Â'),
-        ('¼¼ºÎÁú¹®', '¼¼ºÎÁú¹®'),
-        ('»ó´ã½ÅÃ»', '»ó´ã½ÅÃ»'),
+        ('ì •ë³´ì…ë ¥', 'ê³ ê°ì˜ë¢°'),
+
+        ('1', 'ìœ ì„ ìƒë‹´1'),
+        ('10', 'ìœ ì„ ìƒë‹´2'),
+
+        ('ì—…ì²´ ìˆ˜ë°°', 'ì—…ì²´ìˆ˜ë°°'),
+
+        ('2', 'ì—…ì²´ê²¬ì ë¬¸ì˜'),
+        ('3', 'ì—…ì²´ìš”êµ¬ì •ë³´ì¶”ê°€'),
+
+
+        ('4', 'ê²¬ì ê²€í† ì¤‘'),
+        
+        ('5', 'íƒ€ì—…ì²´ê²¬ì ìš”ì²­'),
+
+        ('6', 'ë¯¸íŒ…'),
+        ('7', 'ì§ì ‘ì—°ê²°(ë§¤ì¹­)'),
+
+
+        ('ê±°ë˜ì™„ë£Œ', 'ê³„ì•½ì²´ê²°'),
+
+        ('ê±°ë˜ ë³´ë¥˜', 'ê±°ë˜ ë³´ë¥˜'),
+
+        ('DROP-ê¸°íšë¶€ì¡±', 'DROP-ê¸°íšë¶€ì¡±'),
+        ('DROP-ì˜ˆì‚°ë¶€ì¡±', 'DROP-ì˜ˆì‚°ë¶€ì¡±'),
+        ('DROP-MOQë¶€ì¡±', 'DROP-MOQë¶€ì¡±'),
+        ('DROP-ë‚©ê¸°ì´‰ë°•', 'DROP-ë‚©ê¸°ì´‰ë°•'),
+        ('DROP', 'DROP'),
     ]
 
-    createdAt = models.DateTimeField('µî·ÏÀÏÀÚ', default=timezone.now)
-    status = models.CharField('ÇÁ·ÎÁ§Æ® »óÅÂ', max_length=10, default="¸ğÁıÁß", blank=True, choices=PROGRESS, null=True)
-    title = models.CharField('ÇÁ·ÎÁ§Æ® Á¦¸ñ', max_length = 150, blank=True, null=True)
-    transferMoney = models.CharField('ÀÔ±İ ¿©ºÎ', max_length=10, default='¾Æ´Ï¿À', choices=TRANSFER)
-    memo = models.TextField('ÇÇµå¹é', blank=True, null=True)
-    manager = models.ForeignKey(Manager, on_delete = models.CASCADE, verbose_name='´ã´çÀÚ',related_name='project', null=True)
-    #project_status = models.ForeignKey(ProjectStatus, on_delete = models.CASCADE, verbose_name='»óÈ²',related_name='project', null=True)
-    progressStep = models.CharField('°í°´ ÁøÇà ´Ü°è', max_length=10, default='', choices=STEP)
-    estimate = models.IntegerField('°ßÀû', blank=True, null=True, default=0) 
-    explain = models.TextField('¼³¸í', blank=True, null=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='ÀÛ¼ºÅ¬¶óÀÌ¾ğÆ®',null=True) # ÀÛ¼ºÇÑ Å¬¶óÀÌ¾ğÆ® FK
-    reason = models.CharField('°í°´ ÀÇ·Ú ÀÌÀ¯', max_length=256, blank=True, null=True)
+    createdAt = models.DateTimeField('ë“±ë¡ì¼ì', default=timezone.now)
+    status = models.CharField('í”„ë¡œì íŠ¸ ìƒíƒœ', max_length=10, default="ëª¨ì§‘ì¤‘", blank=True, choices=PROGRESS, null=True)
+    title = models.CharField('í”„ë¡œì íŠ¸ ì œëª©', max_length = 150, blank=True, null=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='ì‘ì„±í´ë¼ì´ì–¸íŠ¸',null=True) # ì‘ì„±í•œ í´ë¼ì´ì–¸íŠ¸ FK
 
+    memo = models.TextField('ìƒë‹´ ë‚´ìš©', blank=True, null=True)
+    manager = models.ForeignKey(Manager, on_delete = models.CASCADE, verbose_name='ë‹´ë‹¹ì',related_name='project', null=True,blank=True)
+    #project_status = models.ForeignKey(ProjectStatus, on_delete = models.CASCADE, verbose_name='ìƒí™©',related_name='project', null=True)
+    progressStep = models.CharField('ê³ ê° ì§„í–‰ ë‹¨ê³„', max_length=10, default='', choices=STEP)
+    explain = models.TextField('ì¤‘ìš” ì‚¬í•­', blank=True, null=True)
+    reason = models.CharField('ë‹´ë‹¹ì ì½”ë©˜íŠ¸', max_length=256, blank=True, null=True)
+
+    text = RichTextUploadingField(blank=True, null=True)
+
+    estimate = models.IntegerField('ê³„ì•½ ê¸ˆì•¡', blank=True, null=True, default=0) 
+    hope_estimate = models.IntegerField('ì˜ˆìƒ ê¸ˆì•¡', blank=True, null=True, default=0)
+    partner_estimate = models.IntegerField('íŒŒíŠ¸ë„ˆ ê²¬ì  ê¸ˆì•¡', blank=True, null=True, default=0)
+    transferMoney = models.CharField('ì…ê¸ˆ ì—¬ë¶€', max_length=10, default='ì•„ë‹ˆì˜¤', choices=TRANSFER)
+
+    client_email = models.CharField('í´ë¼ì´ì–¸íŠ¸ ì´ë©”ì¼', max_length=256, blank=True, null=True)
+    client_phone = models.CharField('í´ë¼ì´ì–¸íŠ¸ í•¸ë“œí°', max_length=256, null=True)
 
     class Meta:
-        verbose_name = '     ÇÁ·ÎÁ§Æ®'
-        verbose_name_plural = '     ÇÁ·ÎÁ§Æ®'
+        verbose_name = '     í”„ë¡œì íŠ¸'
+        verbose_name_plural = '     í”„ë¡œì íŠ¸'
 
     def __str__(self):
         return str(self.id)
 
 # ------------------------------------------------------------------
+# Model   : ProjectFile
+# Description : í”„ë¡œì íŠ¸ íŒŒì¼ ëª¨ë¸ : ë§¤ë‹ˆì €ê°€ ì²¨ë¶€í•œ ëª¨ë¸
+# ------------------------------------------------------------------
+class ProjectFile(models.Model):
+    project = models.ForeignKey(Project, on_delete = models.CASCADE, verbose_name= 'ì˜ë¢°ì„œ')
+    name = models.CharField('íŒŒì¼ ë©”ëª¨', max_length=256, null=True, blank=True)
+    file = models.FileField('ë§¤ë‹ˆì € íŒŒì¼', upload_to=project_update_filename, blank=False, null=False, max_length=255)
+    share_inform = models.BooleanField('ë¯¼ê°ì •ë³´ í¬í•¨ ì—¬ë¶€', default=False)
+
+    class Meta:
+        verbose_name = 'ë§¤ë‹ˆì € ì²¨ë¶€íŒŒì¼'
+        verbose_name_plural = 'ë§¤ë‹ˆì € ì²¨ë¶€íŒŒì¼'
+    def __str__ (self):
+        return str(self.project) + ' ë§¤ë‹ˆì € ì²¨ë¶€'
+
+
+    def delete(self, *args, **kwargs):
+        s3_client = boto3.client('s3',aws_access_key_id='AKIATYAEQEY5RQM64SEC',aws_secret_access_key='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')
+        s3_client.delete_object(Bucket='boltnnutplatform', Key='media/'+self.file.name)
+        super(ProjectFile, self).delete(*args, **kwargs)
+
+
+
+# ------------------------------------------------------------------
 # Model   : Request
-# Description : ÀÇ·Ú¼­ ¸ğµ¨ 
+# Description : ì˜ë¢°ì„œ ëª¨ë¸ 
 # ------------------------------------------------------------------
 class Request(models.Model):
 
-    request_state = [
-        ('»ó´ã¿äÃ»', '»ó´ã¿äÃ»'),
-        ('°ßÀû¹®ÀÇ', '°ßÀû¹®ÀÇ'),
-        ('¾÷Ã¼¼ö¹è', '¾÷Ã¼¼ö¹è'),
+    request_states = [
+        (0, 'ìƒë‹´ìš”ì²­'),
+        (1, 'ê²¬ì ë¬¸ì˜'),
+        (2, 'ì—…ì²´ìˆ˜ë°°'),
     ]
 
-    deadline_state = [
-        ('³³±âÀÏ¹ÌÁ¤', '³³±âÀÏ¹ÌÁ¤'),
-        ('³³±âÀÏÇùÀÇ°¡´É', '³³±âÀÏÇùÀÇ°¡´É'),
+    deadline_states = [
+        (0, 'ë‚©ê¸°ì¼ë¯¸ì •'),
+        (1, 'ë‚©ê¸°ì¼í˜‘ì˜ê°€ëŠ¥'),
     ]
 
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='ÀÛ¼ºÅ¬¶óÀÌ¾ğÆ®')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='ÇÁ·ÎÁ§Æ®')
-    request_state = models.CharField('¹®ÀÇ ¸ñÀû', max_length=10, default='', choices=request_state)
-    name = models.CharField('»ó´ã¸í', max_length=256, blank=True, null=True)
-    deadline = models.DateTimeField('³³±âÀÏ', default=timezone.now, null=True)
-    deadline_state = models.CharField('³³±âÀÏ »óÅÂ', max_length=10, default='', choices=deadline_state)
-    order_request_open = models.CharField('°ø°³ ¹ßÁÖ ¿äÃ»»çÇ×', max_length=5000, blank=True, null=True)
-    order_request_close = models.CharField('ºñ°ø°³ ¹ßÁÖ ¿äÃ»»çÇ×', max_length=5000, blank=True, null=True)
-    createdAt = models.DateTimeField('µî·ÏÀÏÀÚ', default=timezone.now)
-    price = models.IntegerField('Èñ¸Áºñ¿ë', blank=True, null=True) # À§¿Í °°À¸³ª ÇÁ·ÎÁ§Æ®¿Í °°ÀÌ ºñ¿ëÀ» »èÁ¦ÇÒ ¿¹Á¤ÀÓ
+    prices = [
+        ( 1, "100ë§Œì› ì´í•˜" ),
+        ( 2, "100ë§Œì› - 300ë§Œì›" ),
+        ( 3, "300ë§Œì› - 500ë§Œì›" ),
+        ( 4, "500ë§Œì› - 1000ë§Œì›"),
+        ( 5, "1000ë§Œì› - 2000ë§Œì›"),
+        ( 6, "2000ë§Œì› - 3000ë§Œì›"),
+        ( 7, "3000ë§Œì› - 5000ë§Œì›"),
+        ( 8, "5000ë§Œì› - 1ì–µì›"),
+        ( 9, "1ì–µì›ì´ìƒ"),
+    ]
+
+    regionAry= [
+      (1, "ì„œìš¸" ),
+      (2, "ê²½ê¸°ë„" ),
+      (3, "ì¸ì²œ" ),
+      (4, "ì¶©ì²­ë„" ),
+      (5, "ê²½ìƒë¶ë„" ),
+      (6, "ê²½ìƒë‚¨ë„" ),
+      (7, "ì „ë¼ë„" ),
+      (8, "ì œì£¼ë„" ),
+
+    ]
+
+    region_states = [
+        (0, 'ë¯¸ì •'),
+        (1, 'í˜‘ì˜ê°€ëŠ¥'),
+
+    ]
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='ì‘ì„±í´ë¼ì´ì–¸íŠ¸')
+    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name='ì œì¡°ì‚¬ ì°¾ê¸°ë¡œ ë“¤ì–´ì˜¨ íŒŒíŠ¸ë„ˆ',blank=True,null=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='í”„ë¡œì íŠ¸')
+    request_state = models.CharField('ë¬¸ì˜ ëª©ì ', max_length=10, default='', choices=request_states)
+    name = models.CharField('ìƒë‹´ëª…', max_length=256, blank=True, null=True)
+    deadline = models.DateTimeField('ë‚©ê¸°ì¼', default=timezone.now)
+    deadline_state = models.CharField('ë‚©ê¸°ì¼ ìƒíƒœ', max_length=10, default='', choices=deadline_states)
+    contents = models.CharField('ê³µê°œ ë°œì£¼ ìš”ì²­ì‚¬í•­', max_length=5000, blank=True, null=True)
+    order_request_close = models.CharField('ë¹„ê³µê°œ ë°œì£¼ ìš”ì²­ì‚¬í•­', max_length=5000, blank=True, null=True)
+    price = models.CharField('í¬ë§ë¹„ìš©', blank=True, max_length=256,null=True, default='1', choices=prices) 
+    createdAt = models.DateTimeField('ë“±ë¡ì¼ì', default=timezone.now)
+    category = models.ForeignKey(Mainbusiness, on_delete=models.CASCADE, verbose_name="ì¹´í…Œê³ ë¦¬", blank=True, null=True)
+    region = models.CharField('ì‹œ/ë„', max_length=10, default=0,choices=regionAry, blank=True, null=True)
+    region_state = models.CharField('ì‹œ/ë„ í˜‘ì˜', max_length=10, default=0, choices=region_states, blank=True, null=True)
 
     class Meta:
-        verbose_name = '     ¿äÃ»µÈ ÀÇ·Ú'
-        verbose_name_plural = '     ¿äÃ»µÈ ÀÇ·Ú'
+        verbose_name = '     ìš”ì²­ëœ ì˜ë¢°'
+        verbose_name_plural = '     ìš”ì²­ëœ ì˜ë¢°'
 
     def __str__(self):
         return str(self.name)
 
 # ------------------------------------------------------------------
 # Model   : RequestFile
-# Description : ÀÇ·Ú¼­ ÆÄÀÏ ¸ğµ¨ : ÀÇ·Ú¼­¿¡ Ã·ºÎÇÑ ÆÄÀÏ ¸ğµ¨ÀÎµ¥ Áßº¹ÀÌ µÇ¾î¼­ Á¤µ·ÀÌ ÇÊ¿äÇÔ
+# Description : ì˜ë¢°ì„œ íŒŒì¼ ëª¨ë¸ : ì˜ë¢°ì„œì— ì²¨ë¶€í•œ íŒŒì¼ ëª¨ë¸ì¸ë° ì¤‘ë³µì´ ë˜ì–´ì„œ ì •ëˆì´ í•„ìš”í•¨
 # ------------------------------------------------------------------
 class RequestFile(models.Model):
-    request = models.ForeignKey(Request, on_delete = models.CASCADE, verbose_name= 'ÀÇ·Ú¼­')
-    file = models.FileField('ÀÇ·ÚÆÄÀÏ', upload_to=request_update_filename, blank=False, null=False, max_length=255)
-    share_inform = models.BooleanField('Á¤º¸ °ø°³ Ã¼Å©', default=False)
+    request = models.ForeignKey(Request, on_delete = models.CASCADE, verbose_name= 'ì˜ë¢°ì„œ')
+    file = models.FileField('ì˜ë¢°íŒŒì¼', upload_to=request_update_filename, blank=False, null=False, max_length=255)
+    share_inform = models.BooleanField('ì •ë³´ ê³µê°œ ì²´í¬', default=False)
 
     class Meta:
-        verbose_name = '     Á¦Ç° ±âº»Á¤º¸ Ã·ºÎÆÄÀÏ'
-        verbose_name_plural = '     Á¦Ç° ±âº»Á¤º¸ Ã·ºÎÆÄÀÏ'
+        verbose_name = '     ì œí’ˆ ê¸°ë³¸ì •ë³´ ì²¨ë¶€íŒŒì¼'
+        verbose_name_plural = '     ì œí’ˆ ê¸°ë³¸ì •ë³´ ì²¨ë¶€íŒŒì¼'
     def __str__ (self):
-        return str(self.request) + ' ÀÇ·Ú¼­'
+        return str(self.request) + ' ì˜ë¢°ì„œ'
+
+
+# ------------------------------------------------------------------
+# Model   : RequestInfo
+# Description : ìƒì„¸ ì˜ë¢°ì„œ ëª¨ë¸ 
+# ------------------------------------------------------------------
+class RequestInfo(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='ì‘ì„±í´ë¼ì´ì–¸íŠ¸')
+    category_big = models.CharField('ëŒ€ë¶„ë¥˜', max_length=256, blank=True, null=True)
+    category_small = models.CharField('ì†Œë¶„ë¥˜', max_length=256, blank=True, null=True)
+    city = models.CharField('ì§€ì—­', max_length=256, blank=True, null=True)
+    price = models.CharField('í¬ë§ë¹„ìš©',max_length=256, blank=True, null=True) 
+    category_middle = models.ManyToManyField(Develop, verbose_name='ì˜ë¢°ê°€ëŠ¥ë¶„ì•¼', related_name='category_request')
+    title = models.CharField('ì œëª©', max_length=256, blank=True, null=True)
+    content = models.TextField('í”¼ë“œë°±', blank=True, null=True)
+    email = models.CharField('ì´ë©”ì¼', max_length=256, blank=True, null=True)
+    phone = models.CharField('í•¸ë“œí°', max_length=256, blank=True, null=True)
+    classified = models.IntegerField('ê³µê°œ í¬ë§', blank=True, null=True) 
+
+    class Meta:
+        verbose_name = 'ì—…ì²´ ìˆ˜ë°° ìš”ì²­'
+        verbose_name_plural = 'ì—…ì²´ ìˆ˜ë°° ìš”ì²­'
+
+    def __str__(self):
+        return str(self.title) 
+
+
+# ------------------------------------------------------------------
+# Model   : RequestInfoFile
+# Description : ì˜ë¢°ì„œ íŒŒì¼ ëª¨ë¸ : ì˜ë¢°ì„œì— ì²¨ë¶€í•œ íŒŒì¼ ëª¨ë¸ì¸ë° ì¤‘ë³µì´ ë˜ì–´ì„œ ì •ëˆì´ í•„ìš”í•¨
+# ------------------------------------------------------------------
+class RequestInfoFile(models.Model):
+    requestInfo = models.ForeignKey(RequestInfo, on_delete = models.CASCADE)
+    file = models.FileField('ì˜ë¢°íŒŒì¼', upload_to=requestInfo_update_filename, blank=False, null=False, max_length=255)
+    share_inform = models.BooleanField('ì •ë³´ ê³µê°œ ì²´í¬', default=False)
+
+    class Meta:
+        verbose_name = 'ìƒì„¸ ì˜ë¢° ì²¨ë¶€íŒŒì¼'
+        verbose_name_plural = 'ìƒì„¸ ì˜ë¢° ì²¨ë¶€íŒŒì¼'
+    def __str__ (self):
+        return str(self.requestInfo)
 
 
 # ------------------------------------------------------------------
 # Model   : Select_save
-# Description : ÀÇ·Î¼­¿¡ ÀúÀåµÇ´Â ¼±ÅÃÁú¹®/´äº¯ ¸ğµ¨ : °´°ü½Ä Áú¹®¿¡ ´ëÇÑ ´äº¯À» À§ÇÑ ³»¿ëÀÎµ¥ ÀÌ ³»¿ëÀº ¼­ºñ½º °íµµÈ­°¡ µÇ±â Àü¿¡´Â »ç¿ëÇÏÁö ¾ÊÀ» ¿¹Á¤ÀÌ³ª ÃßÈÄ °¡´É¼º º¸ÀÓ
+# Description : ì˜ë¡œì„œì— ì €ì¥ë˜ëŠ” ì„ íƒì§ˆë¬¸/ë‹µë³€ ëª¨ë¸ : ê°ê´€ì‹ ì§ˆë¬¸ì— ëŒ€í•œ ë‹µë³€ì„ ìœ„í•œ ë‚´ìš©ì¸ë° ì´ ë‚´ìš©ì€ ì„œë¹„ìŠ¤ ê³ ë„í™”ê°€ ë˜ê¸° ì „ì—ëŠ” ì‚¬ìš©í•˜ì§€ ì•Šì„ ì˜ˆì •ì´ë‚˜ ì¶”í›„ ê°€ëŠ¥ì„± ë³´ì„
 # ------------------------------------------------------------------
 class Select_save(models.Model):
-    request = models.ForeignKey(Request, on_delete=models.CASCADE, verbose_name='ÀÇ·Ú¼­')
-    category = models.ForeignKey(Develop, on_delete=models.CASCADE, verbose_name='°³¹ßºĞ¾ß')
-    question = models.CharField('¼±ÅÃÁú¹®', max_length=256, blank=True, null=True)
-    answer = models.CharField('¼±ÅÃÁú¹®´äº¯', max_length=256, blank=True, null=True)
+    request = models.ForeignKey(Request, on_delete=models.CASCADE, verbose_name='ì˜ë¢°ì„œ')
+    category = models.ForeignKey(Develop, on_delete=models.CASCADE, verbose_name='ê°œë°œë¶„ì•¼')
+    question = models.CharField('ì„ íƒì§ˆë¬¸', max_length=256, blank=True, null=True)
+    answer = models.CharField('ì„ íƒì§ˆë¬¸ë‹µë³€', max_length=256, blank=True, null=True)
 
     class Meta:
-        verbose_name = '     ÀÇ·Ú¼­¿¡ ÀúÀåµÇ´Â ¼±ÅÃÁú¹®/´äº¯'
-        verbose_name_plural = '     ÀÇ·Ú¼­¿¡ ÀúÀåµÇ´Â ¼±ÅÃÁú¹®/´äº¯'
+        verbose_name = '     ì˜ë¢°ì„œì— ì €ì¥ë˜ëŠ” ì„ íƒì§ˆë¬¸/ë‹µë³€'
+        verbose_name_plural = '     ì˜ë¢°ì„œì— ì €ì¥ë˜ëŠ” ì„ íƒì§ˆë¬¸/ë‹µë³€'
 
     def __str__(self):
         return str(self.id)
 
 # ------------------------------------------------------------------
 # Model   : Select
-# Description : ¼±ÅÃÁú¹® ¸ğµ¨ : ¿Ö À§¿¡²¨¶û µÎ °³¸¦ ¸¸µé¾ú´Â Áö ÀÌÇØµÇÁö´Â ¾ÊÀ½... »èÁ¦ ¿¹Á¤. À§¿¡²¨°¡ Á¦¾È¼­¶ûµµ ¿¬°áµÇ¾î ÀÖ¾î¼­ ÃßÈÄ »ç¿ëµÉ °¡´É¼ºÀÌ º¸ÀÓ.
+# Description : ì„ íƒì§ˆë¬¸ ëª¨ë¸ : ì™œ ìœ„ì—êº¼ë‘ ë‘ ê°œë¥¼ ë§Œë“¤ì—ˆëŠ” ì§€ ì´í•´ë˜ì§€ëŠ” ì•ŠìŒ... ì‚­ì œ ì˜ˆì •. ìœ„ì—êº¼ê°€ ì œì•ˆì„œë‘ë„ ì—°ê²°ë˜ì–´ ìˆì–´ì„œ ì¶”í›„ ì‚¬ìš©ë  ê°€ëŠ¥ì„±ì´ ë³´ì„.
 # ------------------------------------------------------------------
 class Select(models.Model):
-    # ¼±ÅÃÁú¹®
-    category = models.ForeignKey(Develop, on_delete=models.CASCADE, verbose_name='°³¹ßºĞ¾ßÁßºĞ·ù')
-    request = models.TextField('¼±ÅÃÁú¹®', blank=True, null=True)
+    # ì„ íƒì§ˆë¬¸
+    category = models.ForeignKey(Develop, on_delete=models.CASCADE, verbose_name='ê°œë°œë¶„ì•¼ì¤‘ë¶„ë¥˜')
+    request = models.TextField('ì„ íƒì§ˆë¬¸', blank=True, null=True)
 
 
     class Meta:
-        verbose_name = '     ¼±ÅÃÁú¹®'
-        verbose_name_plural = '     ¼±ÅÃÁú¹®'
+        verbose_name = '     ì„ íƒì§ˆë¬¸'
+        verbose_name_plural = '     ì„ íƒì§ˆë¬¸'
 
     def __str__(self):
         return str(self.request)
         
 # ------------------------------------------------------------------
 # Model   : Content
-# Description : ¼±ÅÃÁú¹®³»¿ë ¸ğµ¨ : ¼±ÅÃ Áú¹®¿¡ ´ëÇÑ ´äº¯À» ÀúÀåÇÑ ¸ğµ¨ ¸¶Âù°¡Áö·Î ÃßÈÄ¿¡ ½Ã½ºÅÛ °íµµÈ­ ½Ã¿¡ »ç¿ë °¡´É¼º ÀÖÀ½
+# Description : ì„ íƒì§ˆë¬¸ë‚´ìš© ëª¨ë¸ : ì„ íƒ ì§ˆë¬¸ì— ëŒ€í•œ ë‹µë³€ì„ ì €ì¥í•œ ëª¨ë¸ ë§ˆì°¬ê°€ì§€ë¡œ ì¶”í›„ì— ì‹œìŠ¤í…œ ê³ ë„í™” ì‹œì— ì‚¬ìš© ê°€ëŠ¥ì„± ìˆìŒ
 # ------------------------------------------------------------------
 class Content(models.Model):
-    # ¼±ÅÃÁú¹®
-    request = models.ForeignKey(Select, on_delete=models.CASCADE, verbose_name='¼±ÅÃÁú¹®')
-    content1 = models.CharField('ÄÁÅÙÃ÷1', max_length=256, blank=True, null=True)
-    content2 = models.CharField('ÄÁÅÙÃ÷2', max_length=256, blank=True, null=True)
-    content3 = models.CharField('ÄÁÅÙÃ÷3', max_length=256, blank=True, null=True)
-    content4 = models.CharField('ÄÁÅÙÃ÷4', max_length=256, blank=True, null=True)
+    # ì„ íƒì§ˆë¬¸
+    request = models.ForeignKey(Select, on_delete=models.CASCADE, verbose_name='ì„ íƒì§ˆë¬¸')
+    content1 = models.CharField('ì»¨í…ì¸ 1', max_length=256, blank=True, null=True)
+    content2 = models.CharField('ì»¨í…ì¸ 2', max_length=256, blank=True, null=True)
+    content3 = models.CharField('ì»¨í…ì¸ 3', max_length=256, blank=True, null=True)
+    content4 = models.CharField('ì»¨í…ì¸ 4', max_length=256, blank=True, null=True)
 
     class Meta:
-        verbose_name = '     ¼±ÅÃÁú¹®ÄÁÅÙÃ÷'
-        verbose_name_plural = '     ¼±ÅÃÁú¹®ÄÁÅÙÃ÷'
+        verbose_name = '     ì„ íƒì§ˆë¬¸ì»¨í…ì¸ '
+        verbose_name_plural = '     ì„ íƒì§ˆë¬¸ì»¨í…ì¸ '
 
     def __str__(self):
         return str(self.request)
 
 # ------------------------------------------------------------------
 # Model   : Answer
-# Description : Á¦¾È¼­ ¸ğµ¨ : ÆÄÆ®³Ê°¡ ÀÇ·Ú¼­¸¦ È®ÀÎÇÏ°í Á¦¾ÈÇÑ Á¦¾È¼­¸¦ ÀúÀåÇÏ´Â ¸ğµ¨ÀÓ. ÇöÀç´Â ³Ê¹« º¹ÀâÇÏ°Ô ÁøÇàµÇ¾î ÀÖ¾î ´Ü¼øÈ­ÇÒ °èÈ¹ÀÓ
+# Description : ì œì•ˆì„œ ëª¨ë¸ : íŒŒíŠ¸ë„ˆê°€ ì˜ë¢°ì„œë¥¼ í™•ì¸í•˜ê³  ì œì•ˆí•œ ì œì•ˆì„œë¥¼ ì €ì¥í•˜ëŠ” ëª¨ë¸ì„. í˜„ì¬ëŠ” ë„ˆë¬´ ë³µì¡í•˜ê²Œ ì§„í–‰ë˜ì–´ ìˆì–´ ë‹¨ìˆœí™”í•  ê³„íšì„
 # ------------------------------------------------------------------
 
 INFO = [
-(0, "Á¤º¸ ¹ÌÈ®ÀÎ"),
-(1, "ÆÄÆ®³Ê»ç Á¤º¸ È®ÀÎ"),
-(2, "ÆÄÆ®³Ê»ç ¿¬¶ô"),
+    (0, "ì •ë³´ ë¯¸í™•ì¸"),
+    (1, "íŒŒíŠ¸ë„ˆì‚¬ ì •ë³´ í™•ì¸"),
+    (2, "íŒŒíŠ¸ë„ˆì‚¬ ì—°ë½"),
 ]
 
 MEETING_STATE = [
-    (0, "NOTSUBMIT"), # ¼±ÅÃµÇÁö ¾ÊÀ½
+    (0, "NOTSUBMIT"), # ì„ íƒë˜ì§€ ì•ŠìŒ
     (1, "YES"),
     (2, "NO"),
 ]
 class Answer(models.Model):
 
-    content1 = models.TextField('ÄÁÅÙÃ÷1', max_length=256, blank=True, null=True)
-    content2 = models.TextField('ÄÁÅÙÃ÷2', max_length=256, blank=True, null=True)
-    content3 = models.TextField('ÄÁÅÙÃ÷3', max_length=256, blank=True, null=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name="ÇÁ·ÎÁ§Æ®", null=True)
-    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="ÆÄÆ®³Ê",)
-    request = models.ForeignKey(Request, on_delete=models.CASCADE, verbose_name="ÀÇ·Ú¼­ ¸ğµ¨", null=True)
-    check_time_client = models.DateTimeField('Å¬¶óÀÌ¾ğÆ® È®ÀÎ ½Ã°£', default = timezone.now, blank=True, null=True)
-    check_time_partner = models.DateTimeField('ÆÄÆ®³Ê È®ÀÎ ½Ã°£', default = timezone.now, blank=True, null=True)
-    share_inform = models.BooleanField('Á¤º¸ °ø°³ Ã¼Å©', default=False)
-    createdAt = models.DateTimeField('ÀÛ¼ºÀÏ', default = timezone.now)
+    content1 = models.TextField('ì»¨í…ì¸ 1', max_length=256, blank=True, null=True)
+    content2 = models.TextField('ì»¨í…ì¸ 2', max_length=256, blank=True, null=True)
+    content3 = models.TextField('ì»¨í…ì¸ 3', max_length=256, blank=True, null=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name="í”„ë¡œì íŠ¸", null=True)
+    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="íŒŒíŠ¸ë„ˆ",)
+    request = models.ForeignKey(Request, on_delete=models.CASCADE, verbose_name="ì˜ë¢°ì„œ ëª¨ë¸", null=True)
+    check_time_client = models.DateTimeField('í´ë¼ì´ì–¸íŠ¸ í™•ì¸ ì‹œê°„', default = timezone.now, blank=True, null=True)
+    check_time_partner = models.DateTimeField('íŒŒíŠ¸ë„ˆ í™•ì¸ ì‹œê°„', default = timezone.now, blank=True, null=True)
+    share_inform = models.BooleanField('ì •ë³´ ê³µê°œ ì²´í¬', default=False)
+    createdAt = models.DateTimeField('ì‘ì„±ì¼', default = timezone.now)
 
     class Meta:
-        verbose_name = '     Á¦¾È¼­'
-        verbose_name_plural = '     Á¦¾È¼­'
+        verbose_name = '     ì œì•ˆì„œ'
+        verbose_name_plural = '     ì œì•ˆì„œ'
 
     def __str__(self):
         return str(self.id)
 
 # ------------------------------------------------------------------
 # Model   : Review
-# Description : ¸®ºä ¸ğµ¨ : Å¬¶óÀÌ¾ğÆ®ÀÇ ¸®ºä ¸ğµ¨·Î ÃßÈÄ ³»¿ë¿¡ ´ëÇØ¼­ Ãß°¡µÉ °¡´É¼ºÀÌ ³ô´Ù.
+# Description : ë¦¬ë·° ëª¨ë¸ : í´ë¼ì´ì–¸íŠ¸ì˜ ë¦¬ë·° ëª¨ë¸ë¡œ ì¶”í›„ ë‚´ìš©ì— ëŒ€í•´ì„œ ì¶”ê°€ë  ê°€ëŠ¥ì„±ì´ ë†’ë‹¤.
 # ------------------------------------------------------------------
 class Review(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name="ÇÁ·ÎÁ§Æ®", null = True)
-    isMain = models.BooleanField('¸ŞÀÎ ÆäÀÌÁö ³ëÃâ ¿©ºÎ', default = False)
-    title = models.CharField('Á¦¸ñ', max_length=256, blank=True, null=True)
-    content = models.TextField('³»¿ë',null = True)
-    createdAt = models.DateTimeField('ÀÛ¼ºÀÏ', default = timezone.now)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name="í”„ë¡œì íŠ¸", null = True)
+    isMain = models.BooleanField('ë©”ì¸ í˜ì´ì§€ ë…¸ì¶œ ì—¬ë¶€', default = False)
+    title = models.CharField('ì œëª©', max_length=256, blank=True, null=True)
+    content = models.TextField('ë‚´ìš©',null = True)
+    createdAt = models.DateTimeField('ì‘ì„±ì¼', default = timezone.now)
 
     class Meta:
-        verbose_name = '¸®ºä'
-        verbose_name_plural = '¸®ºä'
+        verbose_name = 'ë¦¬ë·°'
+        verbose_name_plural = 'ë¦¬ë·°'
 
     def __str__(self):
         return str(self.id)
 
 class Comment(models.Model):
-    client = models.ForeignKey(Client, on_delete= models.CASCADE, verbose_name = "ÀÛ¼ºÅ¬¶óÀÌ¾ğÆ®")
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name = "´ñ±ÛÀÌ´Ş¸°ÇÁ·ÎÁ§Æ®")
-    content = models.TextField('´ñ±Û ³»¿ë')
-    createdAt = models.DateTimeField('µî·ÏÀÏÀÚ', default=timezone.now)
+    client = models.ForeignKey(Client, on_delete= models.CASCADE, verbose_name = "ì‘ì„±í´ë¼ì´ì–¸íŠ¸")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name = "ëŒ“ê¸€ì´ë‹¬ë¦°í”„ë¡œì íŠ¸")
+    content = models.TextField('ëŒ“ê¸€ ë‚´ìš©')
+    createdAt = models.DateTimeField('ë“±ë¡ì¼ì', default=timezone.now)
 
     class Meta:
-        verbose_name = '     ¿äÃ»»çÇ×'
-        verbose_name_plural = '     ¿äÃ»»çÇ×'
+        verbose_name = '     ìš”ì²­ì‚¬í•­'
+        verbose_name_plural = '     ìš”ì²­ì‚¬í•­'
 
 class KakaoToken(models.Model):
     token = models.TextField()
