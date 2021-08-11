@@ -44,10 +44,19 @@ def postDayLog():
     user_log_cnt =len(UserLog.objects.filter(created_at__gte=str(new_date)).filter(created_at__lte=str(today_)))
     d = user_log_cnt
     n = user_log_cnt 
+    three_cnt = 0
+    five_cnt = 0
+    ten_cnt = 0
     for i in user_log:
         n+=i.visit_cnt
         if i.bounce_rate==True:
             bounce_cnt+=1
+        if i.day_cnt >= 10:
+            ten_cnt+=1
+        if i.day_cnt >= 5:
+            five_cnt+=1
+        if i.day_cnt >= 3:
+            three_cnt+=1
 
     bounce_rate = round((bounce_cnt/user_log_cnt)*100,2)
     pv = round((n/d),2)
@@ -96,6 +105,9 @@ def postDayLog():
         revisit_cnt=revisit_cnt,
         revisit_cnt_week=revisit_cnt_week,
         revisit_cnt_day=revisit_cnt_day,
+        three_cnt=three_cnt,
+        five_cnt=five_cnt,
+        ten_cnt=ten_cnt,
         pv_rate = pv,
         bounce_rate=bounce_rate
         )
@@ -364,13 +376,15 @@ def postUserLog():
         user =  UserLog.objects.filter(ip=i.ip).filter(created_at__gte=str(new_date))
         if len(user):
             user=user[0]
+            user.day_cnt +=1
             if user.main_page=='X':
                 user.main_page = 'O'
-                user.save()
+            user.save()
         else:
             UserLog.objects.create(
                 ip=i.ip,
                 main_page='O',
+                day_cnt=1
             )
 
     for i in page_access:
