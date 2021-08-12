@@ -1060,6 +1060,50 @@ class ImgSearch():
         # s3_client.download_file('boltnnutplatform', "portfolio/2021/7/23/8d6b4b8182f54730b6e763d87712157f_portfolio.jpg",  temp_path)
 
 
-if __name__ == "__main__":
-    ImgSearch.dataset(19015)
+class imgUpload():
+    def save():
+        path = '/Users/iyuchang/Downloads/회사소개서_신유선/'
+        file_list = os.listdir(path)
+        for i in file_list:
+            print(i)
+            if i != '.DS_Store':
+                uni1 = unicodedata.normalize('NFC',i)
+                partner = Partner.objects.filter(name=uni1)
+                if partner:
+                    newpath = path+i
+                    file_list = os.listdir(newpath)
+                    for j in file_list:
+                        j = unicodedata.normalize('NFC',j)
+                        if j != '.DS_Store':
+                            buffer = BytesIO()
+                            j_=j.split('.')
+                            if j_[-1] !='html' and j_[-1] !='PDF' and j_[-1]!='JFIF' and j_[-1]!='jfif':
+                                if j_[-1]=='pptx':
+                                    #pptx
+                                    pr=Presentation(newpath+'/'+j)
+                                    pr.save(buffer)
+                                    pptx_file = InMemoryUploadedFile(buffer, None, j, 'application/vnd.openxmlformats-officedocument.presentationml.presentation', sys.getsizeof(pr), None)
+                                    partner[0].file.save(j,pptx_file)
+
+                                elif j_[-1]=='pdf':
+                                    #pdf
+                                    file = open(newpath+'/'+j, 'rb')
+                                    pdf_file = InMemoryUploadedFile(file, None, j, 'application/pdf', sys.getsizeof(file), None)
+                                    partner[0].file.save(j,pdf_file)
+
+                                else:
+                                    #이미지
+                                    im=Image.open(newpath+'/'+j)
+                                    if j_[-1] == 'jpg' or j_[-1]=='JPG':
+                                        im=im.convert('RGB')
+                                        j_[-1]='jpeg'
+                                    im.save(buffer, j_[-1])
+                                    image_file = InMemoryUploadedFile(buffer, None, j, 'image/'+j_[-1], im.size, None)
+
+                                    Portfolio.objects.create(
+                                        partner = partner[0],
+                                        img_portfolio = image_file,
+                                        name = j_[0]
+                                    )
+
         
