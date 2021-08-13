@@ -1105,5 +1105,67 @@ class imgUpload():
                                         img_portfolio = image_file,
                                         name = j_[0]
                                     )
+    def fileupload():
+            path = '/Users/iyuchang/Downloads/0813.csv'
+            csv_file = pd.read_csv(path, error_bad_lines=False)
+            csv_file_values = csv_file.values
+            count = 605240
 
-        
+            for row in csv_file_values:
+                
+                if Partner.objects.filter(name=row[3]):
+                    continue
+                else:
+                    count += 1
+                    city_name = City.objects.filter(maincategory = row[10])
+
+                    row[5] = str(row[5]).replace('-','').replace(')','').replace('(','').replace('.','').strip()
+
+                    if not isinstance(row[2],str):
+                        row[2] = '안녕하세요 , '+row[3]+'입니다. 저희는 '+row[7]+'를 전문으로 하고 있습니다.'
+
+
+                    if city_name:
+
+                        user = User.objects.create(
+                            username = f'boltnnut{count}' + '@boltnnut.com',
+                            password = '1234',
+                            phone = row[5],
+                            type = 1,
+                        )
+                        
+                        partner = Partner.objects.create(
+                            user = user,
+                            name = row[3],
+                            city = city_name[0],
+                            info_company = row[2],
+                            history = row[7],
+                            region = row[13],
+                            certification_list = row[14],
+                            logo='null'
+                        )
+                    else:
+                        user = User.objects.create(
+                            username = f'boltnnut{count}' + '@boltnnut.com',
+                            password = '1234',
+                            phone = row[5],
+                            type = 1,
+                        )
+                        
+                        partner = Partner.objects.create(
+                            user = user,
+                            name = row[3],
+                            info_company = row[2],
+                            history = row[7],
+                            region = row[13],
+                            certification_list = row[14],
+                            logo='null'
+                        )
+                    
+                    # for el in category_middle_list:
+                    #     develop_name = Develop.objects.filter(category = el)
+                    #     partner.category_middle.add(*develop_name)
+                    #     partner.save()
+
+    
+            
