@@ -57,6 +57,29 @@ def postDayLog():
             five_cnt+=1
         if i.day_cnt >= 3:
             three_cnt+=1
+        if i.day_cnt >= 2:
+            two_cnt+=1
+    access_all =DayLog.objects.filter(created_at__gte=str(new_date+relativedelta(hours=-1))).filter(created_at__lte=str(new_date+relativedelta(hours=+2)))
+    access_all_cnt=access_all[0].access_all_cnt
+    access_all_two=access_all[0].two_cnt
+    access_all_three=access_all[0].three_cnt
+    access_all_five=access_all[0].five_cnt
+    access_all_ten=access_all[0].ten_cnt
+    two_per = (two_cnt+access_all_two)/(access_real_cnt+access_all_cnt) * 100
+    print(two_cnt,'+',access_all_two,'/',access_real_cnt,'+',access_all_cnt)
+    three_per = (three_cnt+access_all_three)/(access_real_cnt+access_all_cnt) * 100
+    print(three_cnt,'+',access_all_three,'/',access_real_cnt,'+',access_all_cnt)
+    five_per = (five_cnt+access_all_five)/(access_real_cnt+access_all_cnt) * 100
+    print(five_cnt,'+',access_all_five,'/',access_real_cnt,'+',access_all_cnt)
+    ten_per = (ten_cnt+access_all_ten)/(access_real_cnt+access_all_cnt) * 100
+    print(ten_cnt,'+',access_all_ten,'/',access_real_cnt,'+',access_all_cnt)
+
+    if h==24:
+        two_cnt += access_all_two
+        three_cnt += access_all_three
+        five_cnt += access_all_five
+        ten_cnt += access_all_ten
+        access_all_cnt += access_real_cnt
 
     bounce_rate = round((bounce_cnt/user_log_cnt)*100,2)
     pv = round((n/d),2)
@@ -106,10 +129,16 @@ def postDayLog():
         revisit_cnt_week=revisit_cnt_week,
         revisit_cnt_day=revisit_cnt_day,
         three_cnt=three_cnt,
+        two_cnt=two_cnt,
         five_cnt=five_cnt,
         ten_cnt=ten_cnt,
+        two_per=two_per,
+        three_per=three_per,
+        five_per=five_per,
+        ten_per=ten_per,
         pv_rate = pv,
-        bounce_rate=bounce_rate
+        bounce_rate=bounce_rate,
+        access_all_cnt=access_all_cnt
         )
 
 #재방문자 기준 로그
@@ -193,7 +222,6 @@ def postDayOldVisiterLog():
     bounce_rate = round((bounce_cnt/user_log_cnt)*100,2)
     pv = round(((n+user_log_cnt)/user_log_cnt),2)
 
-
     #검색 성공률
     count = 0
     search_cnt_d = 0
@@ -204,7 +232,6 @@ def postDayOldVisiterLog():
                 count+=1
                
     search_success_cnt = round((count/search_cnt_d)*100,2)
-
    
     revisit_cnt=0
     for i in real_total:
@@ -393,8 +420,8 @@ def postUserLog():
         if len(user):
             user=user[0]
             try:
-                if x[4]=='detail' and user.producer_detail == 'X':
-                    user.producer_detail = 'O'
+                if x[4]=='detail':
+                    user.search_detail = 'O'
                     user.bounce_rate =False
                     user.visit_cnt += 1
                     user.save()
@@ -414,23 +441,18 @@ def postUserLog():
                     user.visit_cnt += 1
                     user.bounce_rate = False
                     user.save()
-                elif x[3]=='manufacturer' and user.manufacturer == 'X':
-                    user.manufacturer = 'O'
-                    user.visit_cnt += 1
-                    user.bounce_rate = False
-                    user.save()
                 elif x[3]=='magazine' and user.magazine == 'X':
                     user.magazine = 'O'
                     user.visit_cnt += 1
                     user.bounce_rate = False
                     user.save()
-                elif x[3]=='phoneClick' and user.phone_click == 'X':
-                    user.phone_click = 'O'
+                elif x[3]=='search' and user.search == 'X':
+                    user.search = 'O'
                     user.visit_cnt += 1
                     user.bounce_rate = False
                     user.save()
-                elif x[3]=='producer' and user.producer == 'X':
-                    user.producer = 'O'
+                elif x[3]=='signup' and user.signUp == 'X':
+                    user.signUp = 'O'
                     user.visit_cnt += 1
                     user.bounce_rate = False
                     user.save()
@@ -440,7 +462,7 @@ def postUserLog():
                 if x[4]=='detail':
                     UserLog.objects.create(
                         ip=i.ip,
-                        producer_detail='O',
+                        search_detail='O',
                         bounce_rate=False,
                         visit_cnt = 1
                     )
@@ -466,13 +488,6 @@ def postUserLog():
                         bounce_rate=False,
                         visit_cnt = 1
                     )
-                elif x[3]=='manufacturer':
-                    UserLog.objects.create(
-                        ip=i.ip,
-                        manufacturer='O',
-                        bounce_rate=False,
-                        visit_cnt = 1
-                    )
                 elif x[3]=='magazine':
                     UserLog.objects.create(
                         ip=i.ip,
@@ -480,20 +495,17 @@ def postUserLog():
                         bounce_rate=False,
                         visit_cnt = 1
                     )
-                elif x[3]=='phoneClick':
+                elif x[3]=='search':
                     UserLog.objects.create(
                         ip=i.ip,
-                        phone_click='O',
+                        search='O',
                         bounce_rate=False,
                         visit_cnt = 1
                     )
-                elif x[3]=='producer':
+                elif x[3]=='signup':
                     UserLog.objects.create(
                         ip=i.ip,
-                        producer='O',
+                        signUp='O',
                         bounce_rate=False,
                         visit_cnt = 1
                     )
-
-
-
