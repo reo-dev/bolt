@@ -121,13 +121,28 @@ class Client(models.Model):
 class Partner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='유저')
     name = models.CharField('업체명', max_length=256, null=True)
+    title = models.CharField('직급', max_length=256, null=True,blank=True)
+    realName = models.CharField('이름', max_length=256, null=True,blank=True)
     logo = models.ImageField('로고', upload_to=partner_update_filename, blank=True, null=True)
-    #지역
-    city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name="시/도", null=True)
     info_company = models.TextField('회사소개', blank=True, null=True)
     history = models.TextField('진행한 제품들', blank=True, null=True)
     deal = models.TextField('주요거래처', blank=True, null=True)
-    category_middle = models.ManyToManyField(Develop, verbose_name='의뢰가능분야', related_name='category_middle')
+    # 지역
+    city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name="시/도", null=True)
+    region = models.CharField('상세 주소', max_length=256, null=True)
+    
+    # 업체 분류
+    business = models.ManyToManyField(Business, verbose_name="업체중분류", blank=True)
+
+    # 만든 제품 분류
+    category = models.ManyToManyField(Category, verbose_name='만들제품분류', blank=True)
+    
+    # 소재 분류
+    material = models.ManyToManyField(Material, verbose_name='소재 분류', blank=True)
+    
+    # 공정 분류
+    develop = models.ManyToManyField(Develop, verbose_name='공정분류', blank=True)
+
     #회원가입 시 파일
     file = models.FileField('회사소개 및 포토폴리오파일', upload_to=partner_update_filename, blank=True, null=True)
     resume = models.FileField('이력서', upload_to=partner_update_filename, blank=True, null=True)
@@ -137,13 +152,39 @@ class Partner(models.Model):
     idenfication_state = models.BooleanField('확인 기업', default=False)
     chat_state = models.BooleanField('채팅 가능', default=False)
 
+    Certification = models.FileField('인증서', upload_to=certification_update_filename, null=True)
+    certification_list = models.CharField('인증서 목록', max_length=256, null=True)
+        
 
     class Meta:
         verbose_name = '파트너'
         verbose_name_plural = '파트너'
 
     def __str__(self):
-        return str(self.user.username)
+        return str(self.name)
+
+# ------------------------------------------------------------------
+# Model   : SNS 로그인 모델
+# Description : 회원 모델
+# ------------------------------------------------------------------
+SNS_TYPE = [
+    (0, "NAVER"),
+    (1, "KAKAO")
+]
+class Snsuser(models.Model):
+
+    # 공통 부분
+    token = models.CharField('토큰', max_length=256, unique=True)
+    username = models.CharField('이메일', max_length=256, unique=True)
+    sns = models.IntegerField('SNS타입', default=0, choices=SNS_TYPE)
+
+    class Meta:
+        verbose_name = 'SNS 연동 유저'
+        verbose_name_plural = 'SNS 연동 유저'
+        
+    def __str__(self):
+        return str(self.username)
+
 
 # ------------------------------------------------------------------
 # Model   : Portfolio
@@ -198,7 +239,7 @@ class Path(models.Model):
 # Model   : Busincess
 # Description : 업종 로그 저장 모델
 # ------------------------------------------------------------------
-class Business(models.Model):
+class Business_client(models.Model):
     business = models.CharField('업종', max_length=256, null=True)
 
 
@@ -293,18 +334,19 @@ class CsvFileUpload(models.Model):
     def __str__(self):
         return str(self.filename)
 
+#본섭 추가
 # ------------------------------------------------------------------
 # Model   : Bookmark
 # Description : 클라이언트 관심파트너 저장
 # ------------------------------------------------------------------
 class Bookmark(models.Model):
-    client =  models.OneToOneField(Client, on_delete=models.CASCADE, verbose_name='클라이언트')
-    bookmark_partner = models.OneToOneField(Partner, on_delete=models.CASCADE, verbose_name='관심 기업')
+    client =  models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='클라이언트')
+    bookmark_partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name='관심 기업')
 
 
     class Meta:
-        verbose_name = '관심 파트너'
-        verbose_name_plural = '관심 파트너'
+        verbose_name = '관심 파트너 북마크'
+        verbose_name_plural = '관심 파트너 북마크'
 
     def __str__(self):
         return str(self.bookmark_partner)
