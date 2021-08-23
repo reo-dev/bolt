@@ -71,7 +71,9 @@ from lxml import etree
 from argparse import ArgumentParser
 import sys
 
-
+#mail thread
+from threading import Thread
+import time
 
 # 계정탈퇴시 핸드폰 번호 null값 넣을 수 없어서 해쉬화
 
@@ -90,7 +92,20 @@ class UserViewSet(viewsets.GenericViewSet):
     """
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-    
+
+    @action(detail=False, methods=('get',), url_path='check', http_method_names=('get',))
+    def email_check(self, request, *args, **kawrgs):    
+        username = request.data.get('username')
+
+        if User.objects.filter(username = username).exists() :
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={'message': '이미 중복된 아이디가 있습니다.'},
+                )
+
+
+        
+
 
     @action(detail=False, methods=('POST',), url_path='login', http_method_names=('post',))
     def login(self, request, *args, **kawrgs):
@@ -141,6 +156,7 @@ class UserViewSet(viewsets.GenericViewSet):
         '''
         새로고침할 때, 토큰 보내서 데이터 가지고 오기
         '''
+        print(request.data)
         user = request.user
         if user.type == 0:
             client = Client.objects.filter(user=user)
@@ -205,7 +221,7 @@ class UserViewSet(viewsets.GenericViewSet):
             status=status.HTTP_400_BAD_REQUEST,
             data={'message': '기존의 비밀번호가 맞지 않습니다.', })
 
-    @action(detail=False, methods=('POST',), url_path='password/phone', http_method_names=('post',))
+    @action(detail=False, methods=('POST',), url_path='password-phone', http_method_names=('post',))
     def send_password(self, request, *args, **kawrgs):
         username = request.data.get('username')
         phone = request.data.get('phone')
@@ -268,7 +284,7 @@ class ClientViewSet(viewsets.ModelViewSet):
         phone = request.data.get('phone')
         type = request.data.get('type')
         marketing = request.data.get('marketing')
-        # type에 따라서 def(partner / client)를 api를 따로 설계
+        #type에 따라서 def(partner / client)를 api를 따로 설계
         if not username or not password:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
@@ -289,10 +305,13 @@ class ClientViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'message': '해당 전화번호가 이미 존재합니다.'})
 
+        if marketing == '1': marketing = True
+        else :marketing == False
+
         user = User.objects.create_user(
             username=username,
             password=password,
-            type=type,
+            type=0,
             phone=phone,
             marketing=marketing,
         )
@@ -306,7 +325,9 @@ class ClientViewSet(viewsets.ModelViewSet):
             business=business,
         )
         token, _ = Token.objects.get_or_create(user=user)
-        sendEmail.send(username)
+
+        mail_thread = Thread(target = sendEmail.send_email, args=(username,))
+        mail_thread.start()
 
         return Response(data={'code': ResponseCode.SUCCESS.value,
                               'message': '회원가입이 성공적으로 완료되었습니다.\n다시 로그인을 해주세요.',
@@ -359,7 +380,7 @@ class ClientViewSet(viewsets.ModelViewSet):
         user = User.objects.create_user(
             username=username,
             password=password,
-            type=type,
+            type=0,
             phone=phone,
             marketing=marketing,
         )
@@ -373,7 +394,6 @@ class ClientViewSet(viewsets.ModelViewSet):
             business=business,
         )
         token, _ = Token.objects.get_or_create(user=user)
-        sendEmail.send(username)
 
         Snsuser.objects.create(
             token = token,
@@ -381,6 +401,8 @@ class ClientViewSet(viewsets.ModelViewSet):
             sns = 0
         )
 
+        mail_thread = Thread(target = sendEmail.send_email, args=(username,))
+        mail_thread.start()
 
 
         return Response(data={'code': ResponseCode.SUCCESS.value,
@@ -677,29 +699,13 @@ class PartnerViewSet(viewsets.ModelViewSet):
                 for data in partner['hits']['hits']:
                     partner_list.append(data.get('_source')['id'])
                 pt2=Partner.objects.filter(id__in=partner_list).annotate(cc=Count('portfolio')).order_by('-cc')
-                for i in pt2:
-                    print(i.id)
-                print(len(pt2))
                 
                 #포트폴리오 데이터
-                portfolio_list = []
+                partnerId =[]
                 for data in portfolio['hits']['hits']:
-                    portfolio_list.append(data.get('_source'))
-                portfolioId =[]
-                for i in portfolio_list:
-                    portfolioId.append(i["partner_id"])
-                    print(i["name"])
-                pt = Partner.objects.filter(id__in=portfolioId).annotate(cc=Count('portfolio')).order_by('-cc')
-                print(len(pt))
-                # for i in pt:
-                    # print(i.name)
-
-
-                # print(Partner.objects.filter(name__contains='신일테크(시흥)')[0].id)
-                # print(Portfolio.objects.filter(partner=10777))
-                # for i in Portfolio.objects.filter(partner=10777):
-                #     print(i.name)
-
+                    partnerId.append(data.get('_source')["partner_id"])
+                pt = Partner.objects.filter(id__in=partnerId).annotate(cc=Count('portfolio')).order_by('-cc')
+               
                 queryset = pt|pt2
 
         #search 파라미터로 들어오지 않은 경우
@@ -717,19 +723,19 @@ class PartnerViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=('GET',), url_path='test_file',http_method_names=('get',))
-    def test_file(self, request, *args, **kwargs):
-        file = request.data.get('file')
-        partner_name = request.data.get('partner_name')
+    # @action(detail=False, methods=('GET',), url_path='test_file',http_method_names=('get',))
+    # def test_file(self, request, *args, **kwargs):
+    #     file = request.data.get('file')
+    #     partner_name = request.data.get('partner_name')
 
-        a = Partner.objects.filter(name=partner_name)
+    #     a = Partner.objects.filter(name=partner_name)
 
-        if a.exists():
-            get_file = Partner.objects.get(id=a[0].id)
-            get_file.file = file
-            get_file.save()
+    #     if a.exists():
+    #         get_file = Partner.objects.get(id=a[0].id)
+    #         get_file.file = file
+    #         get_file.save()
 
-        return Response(data={'message': '해당 의뢰서에 적합한 파트너 리스트입니다.'})
+    #     return Response(data={'message': '해당 의뢰서에 적합한 파트너 리스트입니다.'})
 
     @action(detail=False, methods=('POST',), url_path='signup',http_method_names=('post',))
     def partner_signup(self, request, *args, **kwargs):
@@ -744,50 +750,11 @@ class PartnerViewSet(viewsets.ModelViewSet):
         marketing = request.data.get('marketing')
         name = request.data.get('name')
         title = request.data.get('title')
-        logo = request.data.get('logo')
-        city = request.data.get('city')
-        info_company = request.data.get('info_company')
-        history = request.data.get('history')
-        deal = request.data.get('deal')
         
-        # 카테고리
-        business = request.data.get('business')
-        category = request.data.get('category')
-        material = request.data.get('material')
-        develop = request.data.get('develop')
-
-        # 리스트 형태로 받기 위해서
-        business = business.split(',')
-        category = category.split(',')
-        material = material.split(',')
-        develop = develop.split(',')
-
-        file = request.data.get('file')
-        resume = request.data.get('resume')
-
-
-
         if not phone:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'message': '연락처 값이 없습니다.'})
-
-      
-
-        if not info_company:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'message': '회사소개 값이 없습니다.'})
-        
-        if not resume:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'message': '이력서 파일이 없습니다.'})
-
-        if not deal:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'message': '주요거래처 값이 없습니다.'})
 
         if User.objects.filter(username=username).exists():
             return Response(
@@ -802,7 +769,7 @@ class PartnerViewSet(viewsets.ModelViewSet):
         user = User.objects.create_user(
             username=username,
             password=password,
-            type=type,
+            type=1,
             phone=phone,
             marketing=marketing,
         )
@@ -812,33 +779,16 @@ class PartnerViewSet(viewsets.ModelViewSet):
             realName=realName,
             name=name,
             title=title,
-            info_company=info_company,
-            history=history,
-            deal=deal,
-            logo=logo,
-            file=file,
-            resume=resume,
-            idenfication_state = True,
+            idenfication_state = False,
             chat_state = True,
         )
-        city = City.objects.filter(id=city)
-
-        partner.city = city.first()
-
-        # 리스트 엘리먼트 추출
-        business_elements = Business.objects.filter(id__in=business)
-        category_elements = Category.objects.filter(id__in=category)
-        develop_elements = Develop.objects.filter(id__in=develop)
-        material_elements = Material.objects.filter(id__in=material)
-
-        # 파트너에 추가
-        partner.business.add(*business_elements)
-        partner.category.add(*category_elements)
-        partner.develop.add(*develop_elements)
-        partner.material.add(*material_elements)
 
         partner.save()
-        sendEmail.send(username)
+        
+        mail_thread = Thread(target = sendEmail.send_email, args=(username,))
+        mail_thread.start()
+
+
         token, _ = Token.objects.get_or_create(user=user)
         return Response(data={'code': ResponseCode.SUCCESS.value,
                               'message': '회원가입이 성공적으로 완료되었습니다.\n다시 로그인을 해주세요.',
@@ -862,50 +812,12 @@ class PartnerViewSet(viewsets.ModelViewSet):
         marketing = request.data.get('marketing')
         name = request.data.get('name')
         title = request.data.get('title')
-        logo = request.data.get('logo')
-        city = request.data.get('city')
-        info_company = request.data.get('info_company')
-        history = request.data.get('history')
-        deal = request.data.get('deal')
         
-        # 카테고리
-        business = request.data.get('business')
-        category = request.data.get('category')
-        material = request.data.get('material')
-        develop = request.data.get('develop')
-
-        # 리스트 형태로 받기 위해서
-        business = business.split(',')
-        category = category.split(',')
-        material = material.split(',')
-        develop = develop.split(',')
-
-        file = request.data.get('file')
-        resume = request.data.get('resume')
-
-
-
         if not phone:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={'message': '연락처 값이 없습니다.'})
 
-      
-
-        if not info_company:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'message': '회사소개 값이 없습니다.'})
-        
-        if not resume:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'message': '이력서 파일이 없습니다.'})
-
-        if not deal:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'message': '주요거래처 값이 없습니다.'})
 
         if User.objects.filter(username=username).exists():
             return Response(
@@ -920,7 +832,7 @@ class PartnerViewSet(viewsets.ModelViewSet):
         user = User.objects.create_user(
             username=username,
             password=password,
-            type=type,
+            type=1,
             phone=phone,
             marketing=marketing,
         )
@@ -930,33 +842,16 @@ class PartnerViewSet(viewsets.ModelViewSet):
             name=name,
             title=title,
             realName=realName,
-            info_company=info_company,
-            history=history,
-            deal=deal,
-            logo=logo,
-            file=file,
-            resume=resume,
             idenfication_state = True,
             chat_state = True,
         )
-        city = City.objects.filter(id=city)
-
-        partner.city = city.first()
-
-        # 리스트 엘리먼트 추출
-        business_elements = Business.objects.filter(id__in=business)
-        category_elements = Category.objects.filter(id__in=category)
-        develop_elements = Develop.objects.filter(id__in=develop)
-        material_elements = Material.objects.filter(id__in=material)
-
-        # 파트너에 추가
-        partner.business.add(*business_elements)
-        partner.category.add(*category_elements)
-        partner.develop.add(*develop_elements)
-        partner.material.add(*material_elements)
 
         partner.save()
-        sendEmail.send(username)
+        
+        mail_thread = Thread(target = sendEmail.send_email, args=(username,))
+        mail_thread.start()
+
+
         token, _ = Token.objects.get_or_create(user=user)
         Snsuser.objects.create(
             token = token,
@@ -971,42 +866,167 @@ class PartnerViewSet(viewsets.ModelViewSet):
                                   'user': PatchUserSerializer(user).data,
                               }})
 
-    @action(detail=False, methods=('POST',), url_path='category', http_method_names=('post',))
-    # 파트너 정보와 로고만 제공하는 API
-    def partnerListByCategory(self, request, *args, **kwargs):
         
-        # category = request.data.get('category')
-        count = request.data.get('count')
-        qs = Partner.objects.filter(user__is_active=True).exclude(logo ="null")
-        # qs = PartnerCategory.objects.select_related('partner').exclude(partner__logo ="null")
-        partnerList = PartnerCategorySerializer(qs,many=True).data
-        partnerListSize = len(partnerList)
-        if partnerListSize == 0:
-            partnerList = random.sample(partnerList,partnerListSize)
+    #파트너 회원가입 2페이지 - 카테고리.. 체크박스 
+    @action(detail=False, methods=('POST',), url_path='signup-page2',http_method_names=('post',))
+    def signup_page2(self, request, *args, **kwargs):
+  
+        
+        partnerId = request.data.get('partnerId')
+
+        business = request.data.get('business') # 업체 중분류
+        category = request.data.get('category') # 만들제품분류
+        #---
+        develop = request.data.get('develop') # 공정 분류
+        material = request.data.get('material') # 소재 대분류
+        
+
+        partner = Partner.objects.filter(id = partnerId).first()
+
+ 
+        if business != None :
+            business_elements = Business.objects.filter(id__in=business)
+            partner.business.clear()
+            partner.business.add(*business_elements)
+   
+
+
+        if category != None :
+            category_elements = Category.objects.filter(id__in=category)
+            partner.category.clear()
+            partner.category.add(*category_elements)
+
+
+        if develop != None :
+            develop_elements = Develop.objects.filter(id__in=develop)
+            partner.develop.clear()
+            partner.develop.add(*develop_elements)
+
+
+        if material != None :
+            material_elements = Material.objects.filter(id__in=material)
+            partner.material.clear()
+            partner.material.add(*material_elements)
+
+
+
+        partner.save()
+        return Response( status=status.HTTP_200_OK, )
+        
+    #파트너 회원가입 3페이지 - 파트너 정보
+    @action(detail=False, methods=('POST',), url_path='signup-page3',http_method_names=('post',))
+    def signup_page3(self, request, *args, **kwargs):
+  
+        
+        partnerId = request.data.get('partnerId')
+        city = request.data.get('city')
+        region = request.data.get('region')
+        info_company = request.data.get('info_company')
+    
+        file = request.data.get('file')
+        history = request.data.get('history')
+
+        #portpolo
+        portfolio = request.FILES.getlist('portfolio')
+
+        #deal = request.data.get('deal')
+        #resume = request.data.get('resume')
+
+        if not partnerId:
             return Response(
-                status=status.HTTP_406_NOT_ACCEPTABLE,
-                data={
-                    'message' : "have no category",
-                }
-            )
-        try:
-            partnerList = random.sample(partnerList,count)
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'message': '파트너가 없습니다.'})
+
+        if not city:
             return Response(
-                status=status.HTTP_200_OK,
-                data={
-                    'count' : count,
-                    'data' : partnerList
-                }
-            )
-        except ValueError:
-            partnerList = random.sample(partnerList,partnerListSize)
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'message': '대분류 주소값이 없습니다.'})
+
+        if not region:
             return Response(
-                status=status.HTTP_200_OK,
-                data={
-                    'count' : partnerListSize,
-                    'data' : partnerList
-                }
-            )
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'message': '세부주소값이 없습니다.'})
+
+
+        if not info_company:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'message': '회사소개 값이 없습니다.'})
+        
+
+        partner = Partner.objects.filter(id = partnerId).first()
+
+        
+        #시티 확인 - 값 : 강원,서울,울산,대전,충북,충남 ... 줄임말로 옴 
+        if len(city) == 2 :
+            char1 = City.objects.filter(maincategory__contains = city[0])
+            partner.city = char1.filter(maincategory__contains = city[1]).first()
+            print(partner.city)
+
+        partner.region = region
+
+        partner.info_conpany = info_company
+
+        if file :
+            partner.file = file
+
+
+        partner.history = history
+
+        
+        for pf in portfolio:
+            print(str(pf))
+            portfolio_file = Portfolio.objects.create(
+                    partner = partner,
+                    name = str(pf).split('.')[0],
+                    img_portfolio = pf
+                )
+
+       
+        partner.save()
+        return Response( status=status.HTTP_200_OK,)
+        
+   
+
+
+
+
+    # @action(detail=False, methods=('POST',), url_path='category', http_method_names=('post',))
+    # # 파트너 정보와 로고만 제공하는 API
+    # def partnerListByCategory(self, request, *args, **kwargs):
+        
+    #     # category = request.data.get('category')
+    #     count = request.data.get('count')
+    #     qs = Partner.objects.filter(user__is_active=True).exclude(logo ="null")
+    #     # qs = PartnerCategory.objects.select_related('partner').exclude(partner__logo ="null")
+    #     partnerList = PartnerCategorySerializer(qs,many=True).data
+    #     partnerListSize = len(partnerList)
+    #     if partnerListSize == 0:
+    #         partnerList = random.sample(partnerList,partnerListSize)
+    #         return Response(
+    #             status=status.HTTP_406_NOT_ACCEPTABLE,
+    #             data={
+    #                 'message' : "have no category",
+    #             }
+    #         )
+    #     try:
+    #         partnerList = random.sample(partnerList,count)
+    #         return Response(
+    #             status=status.HTTP_200_OK,
+    #             data={
+    #                 'count' : count,
+    #                 'data' : partnerList
+    #             }
+    #         )
+    #     except ValueError:
+    #         partnerList = random.sample(partnerList,partnerListSize)
+    #         return Response(
+    #             status=status.HTTP_200_OK,
+    #             data={
+    #                 'count' : partnerListSize,
+    #                 'data' : partnerList
+    #             }
+    #         )
 
         
 
@@ -1019,60 +1039,60 @@ class PartnerViewSet(viewsets.ModelViewSet):
   
 # ----------------------------------------------------- 사용하지 않는 API ---------------------------------------------------#
 
-    @action(detail=False, methods=('GET',), url_path='request', http_method_names=('get',))
-    def find_partner(self, request, *args, **kwargs):  # 의뢰서 완성 시에 적합한 파트너 리스트 추천
-        subclass = request.GET['subclass']
+    # @action(detail=False, methods=('GET',), url_path='request', http_method_names=('get',))
+    # def find_partner(self, request, *args, **kwargs):  # 의뢰서 완성 시에 적합한 파트너 리스트 추천
+    #     subclass = request.GET['subclass']
 
-       # partner1_qs = Partner.objects.filter(possible_set__id = subclass)
-       # print(partner1_qs)
-        partner2_qs = Partner.objects.filter(history_set__id = subclass)
-       # print(partner2_qs)
-        #query_set 합치기
-       # partner_qs = partner1_qs.union(partner2_qs)
+    #    # partner1_qs = Partner.objects.filter(possible_set__id = subclass)
+    #    # print(partner1_qs)
+    #     partner2_qs = Partner.objects.filter(history_set__id = subclass)
+    #    # print(partner2_qs)
+    #     #query_set 합치기
+    #    # partner_qs = partner1_qs.union(partner2_qs)
 
-        return Response(data={'code': ResponseCode.SUCCESS.value,
-                              'message': '해당 의뢰서에 적합한 파트너 리스트입니다.',
-                              'data': PartnerSerializer(partner2_qs, many=True).data
-                              }
-                        )
+    #     return Response(data={'code': ResponseCode.SUCCESS.value,
+    #                           'message': '해당 의뢰서에 적합한 파트너 리스트입니다.',
+    #                           'data': PartnerSerializer(partner2_qs, many=True).data
+    #                           }
+    #                     )
 
-    @action(detail=False, methods=['PATCH', ], url_path='coin', http_method_names=('patch',), permission_classes=(IsAuthenticated,),)
-    def update_coin(self, request, *args, **kwargs):  # 코인을 결제했을 때 코인 추가
-        # 결제 성공 시리얼을 받아서 아임포트에 요청.
-        partner_id = request.user.partner.id
-        #partner_id = request.data.get('partner_id')
-        coin = request.data.get('coin')  # 프론트에서 Partner coin값을 불러와서 더하기 혹은 빼기 수행
+    # @action(detail=False, methods=['PATCH', ], url_path='coin', http_method_names=('patch',), permission_classes=(IsAuthenticated,),)
+    # def update_coin(self, request, *args, **kwargs):  # 코인을 결제했을 때 코인 추가
+    #     # 결제 성공 시리얼을 받아서 아임포트에 요청.
+    #     partner_id = request.user.partner.id
+    #     #partner_id = request.data.get('partner_id')
+    #     coin = request.data.get('coin')  # 프론트에서 Partner coin값을 불러와서 더하기 혹은 빼기 수행
 
-        # filter로 검색 시 Queryset이 옴, get은 모델을 가져오고 없으면 예외를 발생시킴
-        partner_data = Partner.objects.get(id=partner_id)
-        # Serializer의 처음 파라미터에는 model(row)이 와야함.
-        partner_data.coin += coin
-        partner_data.save()
+    #     # filter로 검색 시 Queryset이 옴, get은 모델을 가져오고 없으면 예외를 발생시킴
+    #     partner_data = Partner.objects.get(id=partner_id)
+    #     # Serializer의 처음 파라미터에는 model(row)이 와야함.
+    #     partner_data.coin += coin
+    #     partner_data.save()
 
-        return Response(data={'code': ResponseCode.SUCCESS.value,
-                              'message': '코인을 업데이트한 파트너 정보입니다.',
-                              'data': PartnerSerializer(partner_data).data
-                              }
-                        )
+    #     return Response(data={'code': ResponseCode.SUCCESS.value,
+    #                           'message': '코인을 업데이트한 파트너 정보입니다.',
+    #                           'data': PartnerSerializer(partner_data).data
+    #                           }
+    #                     )
 
-    @action(detail=False, methods=['PATCH', ], url_path='minus-coin', http_method_names=('patch',),
-            permission_classes=(IsAuthenticated,), )
-    def minus_coin(self, request, *args, **kwargs):  # 결제 시에 코인을 빼주는 API
-        # 결제 성공 시리얼을 받아서 아임포트에 요청.
-        partner_id = request.user.partner.id
-        coin = request.data.get('coin')  # 프론트에서 Partner coin값을 불러와서 더하기 혹은 빼기 수행
+    # @action(detail=False, methods=['PATCH', ], url_path='minus-coin', http_method_names=('patch',),
+    #         permission_classes=(IsAuthenticated,), )
+    # def minus_coin(self, request, *args, **kwargs):  # 결제 시에 코인을 빼주는 API
+    #     # 결제 성공 시리얼을 받아서 아임포트에 요청.
+    #     partner_id = request.user.partner.id
+    #     coin = request.data.get('coin')  # 프론트에서 Partner coin값을 불러와서 더하기 혹은 빼기 수행
 
-        # filter로 검색 시 Queryset이 옴, get은 모델을 가져오고 없으면 예외를 발생시킴
-        partner_data = Partner.objects.get(id=partner_id)
-        # Serializer의 처음 파라미터에는 model(row)이 와야함.
-        partner_data.coin -= coin
-        partner_data.save()
+    #     # filter로 검색 시 Queryset이 옴, get은 모델을 가져오고 없으면 예외를 발생시킴
+    #     partner_data = Partner.objects.get(id=partner_id)
+    #     # Serializer의 처음 파라미터에는 model(row)이 와야함.
+    #     partner_data.coin -= coin
+    #     partner_data.save()
 
-        return Response(data={'code': ResponseCode.SUCCESS.value,
-                              'message': '코인을 업데이트한 파트너 정보입니다.',
-                              'data': PartnerSerializer(partner_data).data
-                              }
-                        )
+    #     return Response(data={'code': ResponseCode.SUCCESS.value,
+    #                           'message': '코인을 업데이트한 파트너 정보입니다.',
+    #                           'data': PartnerSerializer(partner_data).data
+    #                           }
+    #                     )
 
     #@receiver(post_save, sender=Request)
     #def request_kakaotalk(sender, instance, *args, **kwargs):  # 검수 시 적합한 파트너에게 카카오톡 알림
@@ -1127,101 +1147,101 @@ class PartnerViewSet(viewsets.ModelViewSet):
     #        return True
     #    return False
 
-    @swagger_auto_schema(request_body=PartnerSerializer)
-    @action(detail=False, methods=('PATCH',), url_path='success', http_method_names=('patch',))
-    def meeting_success(self, request, *args, **kwargs):
-        partner_id = request.data.get('partner_id')
-        partner_data = Partner.objects.get(id=partner_id)
-        # Serializer의 처음 파라미터에는 model(row)이 와야함.
-        partner_data.success += 1
-        partner_data.save()
+    # @swagger_auto_schema(request_body=PartnerSerializer)
+    # @action(detail=False, methods=('PATCH',), url_path='success', http_method_names=('patch',))
+    # def meeting_success(self, request, *args, **kwargs):
+    #     partner_id = request.data.get('partner_id')
+    #     partner_data = Partner.objects.get(id=partner_id)
+    #     # Serializer의 처음 파라미터에는 model(row)이 와야함.
+    #     partner_data.success += 1
+    #     partner_data.save()
 
-        return Response(data={'code': ResponseCode.SUCCESS.value,
-                              'message': '파트너 미팅 성공 횟수가 추가되었습니다.',
-                              'data': PartnerSerializer(partner_data).data,
-                              }
-                        )
+    #     return Response(data={'code': ResponseCode.SUCCESS.value,
+    #                           'message': '파트너 미팅 성공 횟수가 추가되었습니다.',
+    #                           'data': PartnerSerializer(partner_data).data,
+    #                           }
+    #                     )
 
-    @swagger_auto_schema(request_body=PartnerSerializer)
-    @action(detail=False, methods=('PATCH',), url_path='fail', http_method_names=('patch',))
-    def meeting_fail(self, request, *args, **kwargs):
-        partner_id = request.data.get('partner_id')
-        partner_data = Partner.objects.get(id=partner_id)
-        # Serializer의 처음 파라미터에는 model(row)이 와야함.
-        partner_data.fail += 1
-        partner_data.save()
+    # @swagger_auto_schema(request_body=PartnerSerializer)
+    # @action(detail=False, methods=('PATCH',), url_path='fail', http_method_names=('patch',))
+    # def meeting_fail(self, request, *args, **kwargs):
+    #     partner_id = request.data.get('partner_id')
+    #     partner_data = Partner.objects.get(id=partner_id)
+    #     # Serializer의 처음 파라미터에는 model(row)이 와야함.
+    #     partner_data.fail += 1
+    #     partner_data.save()
 
-        return Response(data={'code': ResponseCode.SUCCESS.value,
-                              'message': '파트너 미팅 실패 횟수가 추가되었습니다.',
-                              'data': PartnerSerializer(partner_data).data,
-                              }
-                        )
+    #     return Response(data={'code': ResponseCode.SUCCESS.value,
+    #                           'message': '파트너 미팅 실패 횟수가 추가되었습니다.',
+    #                           'data': PartnerSerializer(partner_data).data,
+    #                           }
+    #                     )
 
-    @swagger_auto_schema(request_body=PartnerSerializer)
-    @action(detail=False, methods=('GET',), url_path='meeting', http_method_names=('get',))
-    def meeting_percent(self, request, *args, **kwargs):
-        partner_id = request.data.get('partner_id')
-        partner_data = Partner.objects.get(id=partner_id)
-        meeting_count = (partner_data.success + partner_data.fail)
-        # Serializer의 처음 파라미터에는 model(row)이 와야함.
-        if meeting_count == 0:
-           if not partner_data.success == 0: # 미팅 성공이 1회 이상인 경우
-                partner_data.meeting = 100
-           else:                            # 미팅 성공이 0회인 경우
-                partner_data.meeting = 0
-        else:
-            partner_data.meeting = partner_data.success / meeting_count
+    # @swagger_auto_schema(request_body=PartnerSerializer)
+    # @action(detail=False, methods=('GET',), url_path='meeting', http_method_names=('get',))
+    # def meeting_percent(self, request, *args, **kwargs):
+    #     partner_id = request.data.get('partner_id')
+    #     partner_data = Partner.objects.get(id=partner_id)
+    #     meeting_count = (partner_data.success + partner_data.fail)
+    #     # Serializer의 처음 파라미터에는 model(row)이 와야함.
+    #     if meeting_count == 0:
+    #        if not partner_data.success == 0: # 미팅 성공이 1회 이상인 경우
+    #             partner_data.meeting = 100
+    #        else:                            # 미팅 성공이 0회인 경우
+    #             partner_data.meeting = 0
+    #     else:
+    #         partner_data.meeting = partner_data.success / meeting_count
 
-        partner_data.save()
+    #     partner_data.save()
 
-        return Response(data={'code': ResponseCode.SUCCESS.value,
-                              'message': '파트너의 미팅 전환 성공율 입니다.',
-                              'data': PartnerSerializer(partner_data).data,
-                              }
-                        )
+    #     return Response(data={'code': ResponseCode.SUCCESS.value,
+    #                           'message': '파트너의 미팅 전환 성공율 입니다.',
+    #                           'data': PartnerSerializer(partner_data).data,
+    #                           }
+    #                     )
 
 
-    @action(detail=False, methods=('GET',), url_path='find-partner-name', http_method_names=('get',))
-    def findpartnername(self, request, *args, **kwargs):
-        request_name = request.GET.dict()['name']
-        partner_info = Partner.objects.all().filter(name__contains=request_name)
-        partner_info_len = len(partner_info)
+    # @action(detail=False, methods=('GET',), url_path='find-partner-name', http_method_names=('get',))
+    # def findpartnername(self, request, *args, **kwargs):
+    #     request_name = request.GET.dict()['name']
+    #     partner_info = Partner.objects.all().filter(name__contains=request_name)
+    #     partner_info_len = len(partner_info)
 
-        paginator = Paginator(partner_info, 10)
-        page_number = request.GET.get('page')
-        int_pagenumber = int(page_number)
-        page_obj = paginator.get_page(page_number)
+    #     paginator = Paginator(partner_info, 10)
+    #     page_number = request.GET.get('page')
+    #     int_pagenumber = int(page_number)
+    #     page_obj = paginator.get_page(page_number)
 
-        next_page_obj = int_pagenumber + 1
-        prev_page_obj = int_pagenumber - 1
+    #     next_page_obj = int_pagenumber + 1
+    #     prev_page_obj = int_pagenumber - 1
 
-        total_pages = math.ceil(len(partner_info) / 10)
+    #     total_pages = math.ceil(len(partner_info) / 10)
 
-        if partner_info_len == 0:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={
-                    'message': '찾고 싶은 제조사 이름을 입력하세요.',
-                }
-            )
+    #     if partner_info_len == 0:
+    #         return Response(
+    #             status=status.HTTP_400_BAD_REQUEST,
+    #             data={
+    #                 'message': '찾고 싶은 제조사 이름을 입력하세요.',
+    #             }
+    #         )
 
-        if int_pagenumber > total_pages:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={
-                    'message': '페이지를 찾을 수 없습니다.',
-                }
-            )
+    #     if int_pagenumber > total_pages:
+    #         return Response(
+    #             status=status.HTTP_400_BAD_REQUEST,
+    #             data={
+    #                 'message': '페이지를 찾을 수 없습니다.',
+    #             }
+    #         )
 
-        return Response(
-            status=status.HTTP_200_OK,
-            data={
-                'count': partner_info_len,
-                'next': f'http://52.78.182.54:8080/partner/find-partner-name/?name={request_name}&page={next_page_obj}',
-                'previous': f'http://52.78.182.54:8080/partner/find-partner-name/?name={request_name}&page={prev_page_obj}',
-                'current': PartnerSerializer(page_obj, many=True).data,
-            },
-        )
+    #     return Response(
+    #         status=status.HTTP_200_OK,
+    #         data={
+    #             'count': partner_info_len,
+    #             'next': f'http://52.78.182.54:8080/partner/find-partner-name/?name={request_name}&page={next_page_obj}',
+    #             'previous': f'http://52.78.182.54:8080/partner/find-partner-name/?name={request_name}&page={prev_page_obj}',
+    #             'current': PartnerSerializer(page_obj, many=True).data,
+    #         },
+    #     )
 
 # ----------------------------------------------------- 사용하지 않는 API 끝 ---------------------------------------------------#
 
@@ -1251,14 +1271,17 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         i = 0
         for img_id in ID_list :
             if(Score_list[i]>0.35):
-                ps = Portfolio.objects.get(id = img_id)
-                url_list.append("https://boltnnutplatform.s3.amazonaws.com/media/"+str(ps.img_portfolio))
-                partner_list.append(str(ps.partner.id))
+                if Portfolio.objects.filter(id = img_id).exists() :
+                    ps = Portfolio.objects.filter(id = img_id).first()
+                    url_list.append("https://boltnnutplatform.s3.amazonaws.com/media/"+str(ps.img_portfolio))
+                    partner_list.append(str(ps.partner.id))
                 i=i+1
             else :
                 del Score_list[i]
         
         
+
+        #중복 파트너 정리
         dic = {}
         i = 0
         for url in url_list :
@@ -1280,14 +1303,25 @@ class PortfolioViewSet(viewsets.ModelViewSet):
             url_list.append(key)
         
 
-
         res=[]
         for i in partner_list:
             x=Partner.objects.get(id=i)
             res.append(PartnerSerializer(x).data)
 
-        
 
+     
+        
+        ip=getIp.get(self.request.META.get('HTTP_X_FORWARDED_FOR'),self.request.META.get('REMOTE_ADDR'))
+
+        SearchImg.objects.create(
+            ip = ip,
+            img=request_img,
+            text = str(request_img),
+            count = len(res),
+
+        )
+        
+    
         return Response(
                 status=status.HTTP_200_OK,
                 data={'img_url': url_list,
@@ -1356,14 +1390,14 @@ class PortfolioViewSet(viewsets.ModelViewSet):
             )
 
     
-class PathViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Path.objects.all()
-    serializer_class = PathSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'path']
+# class PathViewSet(viewsets.ModelViewSet):
+#     """
+#     API endpoint that allows groups to be viewed or edited.
+#     """
+#     queryset = Path.objects.all()
+#     serializer_class = PathSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['id', 'path']
 
 class Business_ClientViewSet(viewsets.ModelViewSet):
     """
@@ -1426,7 +1460,7 @@ class PartnerReviewViewSet(viewsets.ModelViewSet):
                 data={'message': '리뷰저장 성공'},
             )
         elif str(new_partner) == '1':
-            review_partner = Partner.objects.get(id=5452)
+            review_partner = Partner.objects.get(id=1)
             client = Client.objects.filter(id=request_client)
 
             PartnerReview.objects.create(
@@ -1449,7 +1483,7 @@ class PartnerReviewViewSet(viewsets.ModelViewSet):
             data={'data' : '제조사 정보 저장, 리뷰 저장 성공'},
         )
 
-    @action(detail=False, methods=('GET',), url_path='partner_filter', http_method_names=('get',))
+    @action(detail=False, methods=('GET',), url_path='partner-filter', http_method_names=('get',))
     def partnerfilter(self, request, *args, **kwargs):
         partner_id = request.GET.dict()['partner_id']
         page_nation = request.GET.dict()['page_nation']
@@ -1487,8 +1521,8 @@ class PartnerReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK,
                 data={
                     'count': partner_info_len,
-                    'next': f'http://52.78.182.54:8080/partner-review/partner_filter?partner_id={partner_id}&page_nation=1&page={next_page_obj}',
-                    'previous': f'http://52.78.182.54:8080/partner-review/partner_filter?partner_id={partner_id}&page_nation=1&page={prev_page_obj}',
+                    'next': f'https://api.boltnnut.com/partner-review/partner_filter?partner_id={partner_id}&page_nation=1&page={next_page_obj}',
+                    'previous': f'https://api.boltnnut.com/partner-review/partner_filter?partner_id={partner_id}&page_nation=1&page={prev_page_obj}',
                     'current': PartnerReviewSerializer(page_obj, many=True).data,
                 },
             )
@@ -1573,7 +1607,6 @@ class SnsuserViewSet(viewsets.ModelViewSet):
         username = request.data.get('username')
         user = User.objects.filter(username=username)
         snsuser = Snsuser.objects.filter(username=username)
-        print(token)
 
         if snsuser:
             if user[0].type ==0:
@@ -1669,11 +1702,10 @@ class BookmarkViewSet(viewsets.ModelViewSet):
                     data={'message': '먼저 클라이언트로 로그인 해주세요'},
             )
 
-
     
     @action(detail=False, methods=('GET',), url_path='exist', http_method_names=('get',))
     def bookmark_exist(self, request, *args, **kwargs):
-        clientID = request.query_params['clientID']
+        clientID = request.GET['clientID']
         partnerID = request.GET['partnerID']
         if(clientID != '20' ):
             c = Client.objects.filter(id = clientID ).first()
@@ -1729,7 +1761,7 @@ class BookmarkViewSet(viewsets.ModelViewSet):
                 Bookmark.objects.filter(client = c, bookmark_partner = p).delete()
                 return Response(
                     status=status.HTTP_201_CREATED,
-                    data={'message': '해당 파트너가 관심기업에서 제거되어있습니다.'},
+                    data={'message': '해당 파트너가 관심기업에서 제거되었습니다.'},
                 )
 
             else : 
@@ -1745,7 +1777,7 @@ class BookmarkViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=('GET',), url_path='client', http_method_names=('get',),)
     def getclient_bookmark(self, request, *args, **kwargs):
-        clientID = request.query_params['clientID']
+        clientID = request.GET['clientID']
 
         if(clientID != '20' ):
             requestClient = Client.objects.get(id = clientID)
@@ -1769,56 +1801,56 @@ class BookmarkViewSet(viewsets.ModelViewSet):
 
 
 
-class CsvFileuploadViewSet(viewsets.ModelViewSet):
-    queryset = CsvFileUpload.objects.all()
-    serializer_class = CsvFileuploadSerializer
+# class CsvFileuploadViewSet(viewsets.ModelViewSet):
+#     queryset = CsvFileUpload.objects.all()
+#     serializer_class = CsvFileuploadSerializer
 
-    @action(detail=False, methods=('POST',), url_path='csvfile_upload', http_method_names=('post',))
-    def fileupload(self, request, *args, **kwargs):
+#     @action(detail=False, methods=('POST',), url_path='csvfile_upload', http_method_names=('post',))
+#     def fileupload(self, request, *args, **kwargs):
 
-        partner_info_file = request.data.get('partner_info_file') # 제조사 정보 엑셀파일
-        portfolio_file = request.data.getlist('portfolio_file') # 회사소개서 파일(ppt or pdf)
-        logo = request.data.get('logo')
+#         partner_info_file = request.data.get('partner_info_file') # 제조사 정보 엑셀파일
+#         portfolio_file = request.data.getlist('portfolio_file') # 회사소개서 파일(ppt or pdf)
+#         logo = request.data.get('logo')
         
-        csv_file = pd.read_csv(partner_info_file, error_bad_lines=False)
-        csv_file_values = csv_file.values
-        count = 70000
+#         csv_file = pd.read_csv(partner_info_file, error_bad_lines=False)
+#         csv_file_values = csv_file.values
+#         count = 70000
         
-        for row in csv_file_values:
-            # print(row)
-            count += 1
-            # print('저장 중',row[7])
-            city_name = City.objects.get(city = row[7])
-            category_middle_list = row[9].split(',')
+#         for row in csv_file_values:
+#             # print(row)
+#             count += 1
+#             # print('저장 중',row[7])
+#             city_name = City.objects.get(city = row[7])
+#             category_middle_list = row[9].split(',')
 
-            # init
-            partner_file = []
-            # file exist
-            for pf in portfolio_file:
-                if str(pf) == f'{row[4]}.pptx' or str(pf) == f'{row[4]}.pdf':
-                    partner_file = pf
+#             # init
+#             partner_file = []
+#             # file exist
+#             for pf in portfolio_file:
+#                 if str(pf) == f'{row[4]}.pptx' or str(pf) == f'{row[4]}.pdf':
+#                     partner_file = pf
             
-            if partner_file != []:
-                user = User.objects.create(
-                    username = f'boltnnut{count}' + '@boltnnut.com',
-                    password = '1234',
-                    phone = row[1],
-                    type = 1,
-                )
+#             if partner_file != []:
+#                 user = User.objects.create(
+#                     username = f'boltnnut{count}' + '@boltnnut.com',
+#                     password = '1234',
+#                     phone = row[1],
+#                     type = 1,
+#                 )
                 
-                partner = Partner.objects.create(
-                    user = user,
-                    name = row[4],
-                    city = city_name,
-                    info_company = row[0],
-                    history = row[3],
-                    file = partner_file,
-                    logo = logo
-                )
+#                 partner = Partner.objects.create(
+#                     user = user,
+#                     name = row[4],
+#                     city = city_name,
+#                     info_company = row[0],
+#                     history = row[3],
+#                     file = partner_file,
+#                     logo = logo
+#                 )
                 
-                for el in category_middle_list:
-                    develop_name = Develop.objects.filter(category = el)
-                    partner.category_middle.add(*develop_name)
-                    partner.save()
+#                 for el in category_middle_list:
+#                     develop_name = Develop.objects.filter(category = el)
+#                     partner.category_middle.add(*develop_name)
+#                     partner.save()
             
-        return Response(data={'message': "Successfully saving {0} partner information.".format(len(csv_file_values))})
+#         return Response(data={'message': "Successfully saving {0} partner information.".format(len(csv_file_values))})
