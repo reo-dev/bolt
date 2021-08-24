@@ -119,6 +119,34 @@ class Client(models.Model):
 # ------------------------------------------------------------------
 
 class Partner(models.Model):
+    sales_state = [
+        ('0','5천만원 미만'),
+        ('1','5천~1억원 미만'),
+        ('2','1억~5억원 미만'),
+        ('3','5억~10억원 미만'),
+        ('4','10억원~50억원 미만'),
+        ('5','50억~100억원 미만'),
+        ('6','100억~200억원 미만'),
+        ('7','200억~400억원 미만'),
+        ('8','400억~600억원 미만'),
+        ('9','600억~800억원 미만'),
+        ('10','800억~1,000억원 미만'),
+        ('11','1,000억~1,500억원 미만'),
+        ('12','1,500억원 이상'),
+    ]
+    staff_state = [
+        ('0', '1~4인'),
+        ('1', '5~9인'),
+        ('2', '10~29인'),
+        ('3', '30~49인'),
+        ('4', '50~99인'),
+        ('5', '100~199인'),
+        ('6', '200~299인'),
+        ('7', '300~499인'),
+        ('8', '500~999인'),
+        ('9', '1000인이상'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='유저')
     name = models.CharField('업체명', max_length=256, null=True)
     title = models.CharField('직급', max_length=256, null=True,blank=True)
@@ -127,34 +155,27 @@ class Partner(models.Model):
     info_company = models.TextField('회사소개', blank=True, null=True)
     history = models.TextField('진행한 제품들', blank=True, null=True)
     deal = models.TextField('주요거래처', blank=True, null=True)
-    # 지역
     city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name="시/도", null=True)
     region = models.CharField('상세 주소', max_length=256, null=True)
-    
-    # 업체 분류
     business = models.ManyToManyField(Business, verbose_name="업체중분류", blank=True)
-
-    # 만든 제품 분류
     category = models.ManyToManyField(Category, verbose_name='만들제품분류', blank=True)
-    
-    # 소재 분류
+    subcategory = models.ManyToManyField(Subcategory, verbose_name='만들제품분류(소)', blank=True)
     material = models.ManyToManyField(Material, verbose_name='소재 분류', blank=True)
-    
-    # 공정 분류
     develop = models.ManyToManyField(Develop, verbose_name='공정분류', blank=True)
-
-    #회원가입 시 파일
     file = models.FileField('회사소개 및 포토폴리오파일', upload_to=partner_update_filename, blank=True, null=True)
     resume = models.FileField('이력서', upload_to=partner_update_filename, blank=True, null=True)
     avg_score = models.DecimalField('평균점수', default=0, max_digits=5, decimal_places=2, null=True)
-    # 안심번호가 아닌 실제 전화번호
     real_phone = models.CharField('실제 휴대폰 번호', max_length=255, blank=True, null=True)
     idenfication_state = models.BooleanField('확인 기업', default=False)
     chat_state = models.BooleanField('채팅 가능', default=False)
+    Certification = models.FileField('인증서', upload_to=certification_update_filename, null=True,blank=True)
+    CEO = models.CharField('대표자', max_length=256,blank=True, null=True)
+    sales = models.CharField('매출액', max_length=10,choices=sales_state, blank=True, null=True)
+    staff = models.CharField('직원수', max_length=10, choices=staff_state, blank=True, null=True)
+    year = models.CharField('설립연도', max_length=10,blank=True, null=True, default='0000')
+    certification_list = models.CharField('인증서 목록', max_length=512,blank=True, null=True)
+    view = models.IntegerField('조회수', default=0)
 
-    Certification = models.FileField('인증서', upload_to=certification_update_filename, null=True)
-    certification_list = models.CharField('인증서 목록', max_length=256, null=True)
-        
 
     class Meta:
         verbose_name = '파트너'
@@ -280,10 +301,10 @@ class PartnerReview(models.Model):
     partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="파트너", null=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="클라이언트", null=True)
     projectname = models.CharField('프로젝트 이름', max_length=256, null=True)
-    consult_score = models.IntegerField('점수', default=0)
-    kindness_score = models.IntegerField('점수', default=0)
-    communication_score = models.IntegerField('점수', default=0)
-    profession_score = models.IntegerField('점수', default=0)
+    consult_score = models.IntegerField('상담 점수', default=0)
+    kindness_score = models.IntegerField('친절 점수', default=0)
+    communication_score = models.IntegerField('소통 점수', default=0)
+    profession_score = models.IntegerField('전문성 점수', default=0)
     content = models.TextField('리뷰내용', blank=True, null=True)
     new_partner = models.IntegerField('새로운 제조사', null=True)
     partner_name = models.CharField('새로운 제조사 이름', max_length=256, null=True)
