@@ -15,7 +15,6 @@ import time
 from apps.project.models import *
 from apps.account.models import Portfolio
 
-
 from pathlib import Path
 from email.mime.image import MIMEImage
 from django.core.mail import EmailMultiAlternatives
@@ -25,19 +24,38 @@ import csv
 import glob
 import urllib.request
 
-
 #from google.cloud import storage
 from google.cloud import vision
+from google.cloud import storage
 from google.oauth2 import service_account
 from base64 import b64encode
 from google.protobuf import field_mask_pb2 as field_mask
 import boto3
+import time
+import smtplib
+
+# 이메일 메시지에 다양한 형식을 중첩하여 담기 위한 객체
+from email.mime.multipart import MIMEMultipart
+
+# 이메일 메시지를 이진 데이터로 바꿔주는 인코더
+from email import encoders
+
+# 텍스트 형식
+from email.mime.text import MIMEText
+# 이미지 형식
+from email.mime.image import MIMEImage
+# 오디오 형식
+from email.mime.audio import MIMEAudio
+
+# 위의 모든 객체들을 생성할 수 있는 기본 객체
+# MIMEBase(_maintype, _subtype)
+# MIMEBase(<메인 타입>, <서브 타입>)
+from email.mime.base import MIMEBase
 
 class ResponseCode(enum.Enum):
 
     SUCCESS = 0
     FAIL = 1
-
 
 @deconstructible
 class FilenameChanger(object):
@@ -93,118 +111,6 @@ class Util():
         for i in range(length):
             result += random.choice(string.digits + string.ascii_letters)
         return str(result)
-
-class kakaotalk(object):
-# 빈 전화번호 / 이상한 전화번호는 에러뜹니다.
-        def send(phone_list, subject):
-            # print(subject)
-            # print(phone_list)
-            # for phone in phone_list:
-            #  print(phone)
-            #  url = 'https://api.bizppurio.com/v1/message'
-            #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
-            #          'to': phone, 'content': {
-            #        'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'request_to_partner2',
-            #                 'message': '파트너님에게 적합한 의뢰서가 도착했습니다.\n의뢰서명 : ' + subject,
-
-            #               'button': [
-            #                     {
-            #                      'name': '확인하러 가기',
-            #                      'type': 'WL',
-            #                      'url_mobile': 'http://www.boltnnut.com',
-            #                      'url_pc': 'http://www.boltnnut.com'
-            #                  }
-            #              ]}}}
-            #  headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            #  response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return 
-
-
-class kakaotalk2(object):
-# 빈 전화번호 / 이상한 전화번호는 에러뜹니다.
-        def send(phone_list, subject, subclass,category):
-            # print(subject)
-            # print(phone_list)
-            # for phone in phone_list:
-            #  print(phone)
-            #  url = 'https://api.bizppurio.com/v1/message'
-            #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
-            #          'to': phone, 'content': {
-            #        'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'request_to_partner3',
-            #                 'message': '파트너님에게 적합한 의뢰서가 도착했습니다.\n의뢰서명 : ' + subject + '\n의뢰제품분야 : ' + str(subclass) + '\n제조의뢰분야 : ' + category,
-
-            #               'button': [
-            #                     {
-            #                      'name': '확인하러 가기',
-            #                      'type': 'WL',
-            #                      'url_mobile': 'http://www.boltnnut.com',
-            #                      'url_pc': 'http://www.boltnnut.com'
-            #                  }
-            #              ]}}}
-            #  headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            #  response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
-
-
-class kakaotalk_request(object):
-# 빈 전화번호 / 이상한 전화번호는 에러뜹니다.
-        def send(phone_list):
-            # print(phone_list)
-            # for phone in phone_list:
-            #  #print(phone)
-            #  url = 'https://api.bizppurio.com/v1/message'
-            #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
-            #          'to': phone, 'content': {
-            #        'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'answer_to_client',
-            #                 'message': '고객님의 의뢰에 대한 전문가의 제안서가 도착하였습니다.\n\n* 해당 메시지는 고객님께서 요청하신 의뢰에 대한 제안이 있을 경우 발송됩니다',
-
-            #               'button': [
-            #                     {
-            #                      'name': '확인하러 가기',
-            #                      'type': 'WL',
-            #                      'url_mobile': 'http://www.boltnnut.com',
-            #                      'url_pc': 'http://www.boltnnut.com'
-            #                  }
-            #              ]}}}
-            #  headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            #  response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
-
-class kakaotalk_request_edit_end(object):
-# 빈 전화번호 / 이상한 전화번호는 에러뜹니다.
-        def send(phone):
-            #  url = 'https://api.bizppurio.com/v1/message'
-            #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
-            #          'to': phone, 'content': {
-            #          'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'request_edit_end',
-            #                 'message':'고객님의 의뢰서 검토가 완료되어 파트너 제안서 모집이 시작되었습니다.\n\n제안서가 도착할 때마다 카카오톡 알림메시지를 보내드립니다.\n\n조금만 기다려주세요'}}}
-            #  headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            #  response = requests.post(url, data=json.dumps(data), headers=headers)
-            #  return response
-            return
-
-class kakaotalk_send_information(object):
-# 빈 전화번호 / 이상한 전화번호는 에러뜹니다.
-        def send(phone_list, subject, content, price, period, file):
-            # print(subject)
-            # print(phone_list)
-            # for phone in phone_list:
-            #  print(phone)
-            #  url = 'https://api.bizppurio.com/v1/message'
-            #  data = {'account': 'boltnnut_korea', 'refkey': 'bolt123', 'type': 'at', 'from': '01028741248',
-            #          'to': phone, 'content': {
-            #          'at': {'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_request_information3',
-            #                 'message': '다음 의뢰를 주신 클라이언트에게 파트너님을 추천하고자합니다.\n클라이언트와 소통의사가 있으시면 ‘O’를, 없으시다면 ‘X’를 남겨주시길 바랍니다.\n\n해당 프로젝트를 진행할 의사가 있는 업체만 추천될 예정입니다.\n추천 후 클라이언트분께서 파트너님의 정보를 확인한 후 전화드릴 수 있습니다.\n\n의뢰제품 : ' + subject + '\n\n상담내용 : ' + content + '\n\n희망예산 : ' + price + '\n\n희망기간 : ' + period +  '\n\n의뢰파일 : ' + file
-            #                 }
-            #             }
-            #          }
-            #  headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            #  response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
 
 class kakaotalk_send_IDPassword(object):
     def send(phoneNumber, username,title, password):
@@ -294,218 +200,6 @@ class kakaotalk_set_temp_password():
         return response
         return
 
-class kakaotalk_send_meeting_confirm():
-        def send(phoneNumber,requestCategory,requestTitle):
-            # token = KakaoToken.objects.get(id=1)
-            # Authorization = token.token
-            
-            # consultant1 = "노현수 기술팀장"
-            # consultant2 = "최진영 기술이사"
-            # consultant3 = Consultant.objects.order_by("?").filter(id__lt=9).first().name
-            # print("랜덤 컨설턴트 : ",consultant3)
-            # url = 'https://api.bizppurio.com/v3/message'
-            # data = {
-            #     'account': 'boltnnut_korea', 
-            #     'refkey': 'bolt123', 
-            #     'type': 'at', 
-            #     'from': '01028741248',
-            #     'to': phoneNumber, 
-            #     'content': {
-            #         'at': {
-            #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_meeting_confirm',
-            #             'message': '안녕하세요. 볼트앤너트입니다.\n\n의뢰주신 ' + requestTitle + '의 가견적은 잘 받아보셨나요?\n\n'+requestTitle +' 의뢰에는 '+requestCategory+'의 전문 컨설턴트인 ' + consultant1 +',' + consultant2 + ',' + consultant3 +'님이 배정되어 있습니다.\n\n볼트앤너트는 전문 컨설턴트의 상담을 통한 정확한 견적 서비스를 무료로 제공하고 있으니\n\n상담을 통해 '+requestTitle +'의 정확한 견적과 전문 지식을 알아보세요\n\n상담은 볼트앤너트 홈페이지에서 로그인하신 후 작성하신 의뢰 페이지에서 요청하실 수 있습니다.\n\n지금 바로 상담을 원하시면 볼트앤너트 상담 전화인 02-926-6637로 바로 전화주세요.',
-            #             'button': [
-            #                 {
-            #                     'name': '무료 상담 받으러 가기',
-            #                     'type': 'WL',
-            #                     'url_mobile': 'https://www.boltnnut.com/',
-            #                     'url_pc': 'https://www.boltnnut.com/'
-            #                 }
-            #             ]
-            #         }
-            #     }
-            # }
-            # headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-            # response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
-          
-class kakaotalk_send_meetin_content(object):
-    def send(title, startAt, isOnline, phone):
-        # try:
-        #     message = "안녕하세요. 볼트앤너트입니다.\n의뢰주신 {title}에 전문 컨설턴트가 배정되어 상담을 진행할 예정입니다.\n{startAt}에 {place}에서 뵙겠습니다.\n{online}\n정확한 상담을 위해서 첨부된 링크에 포함된 상담 의뢰서를 작성해주시면\n담당 컨설턴트님께서 더욱 적합한 상담을 드릴 수 있습니다.\n추가적으로 궁금하신 사항이 있다면 {BnNPhone}, {BnNEmail}로 문의사항을 보내주세요.\n감사합니다.".format(
-        #         title = title,
-        #         startAt = startAt,
-        #         place = '서울특별시 성북구 고려대로27길 3 2층' if not isOnline else 'ZooM 화상회의',
-        #         online = 'ZooM 화상회의 주소는 미팅 1시간 전 다시 안내 드리겠습니다.\n' if isOnline else ' ',
-        #         BnNPhone = '02-926-6637',
-        #         BnNEmail = 'project@boltnnut.com'
-        #     )
-        #     token = KakaoToken.objects.get(id=1)
-        #     Authorization = token.token
-        #     url = 'https://api.bizppurio.com/v3/message'
-        #     data = {
-        #         'account': 'boltnnut_korea', 
-        #         'refkey': 'bolt123', 
-        #         'type': 'at', 
-        #         'from': '01028741248',
-        #         'to': phone, 
-        #         'content': {
-        #             'at': {
-        #                 'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 
-        #                 'templatecode': 'send_meeting_contentdaybefore2',
-        #                 'message': message,
-        #                 'button': [
-        #                     {
-        #                         'name': '상담의뢰서 받기',
-        #                         'type': 'WL',
-        #                         'url_mobile': 'https://boltnnutplatform.s3.ap-northeast-2.amazonaws.com/media/request/request.docx',
-        #                         'url_pc': 'https://boltnnutplatform.s3.ap-northeast-2.amazonaws.com/media/request/request.docx'
-        #                     }
-        #                 ]
-        #             }
-        #         }
-        #     }
-        #     headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-        #     response = requests.post(url, data=json.dumps(data), headers=headers)
-        #     return response
-        # except Exception as e:
-        #     return e
-        return
-
-class kakaotalk_send_request_review():
-        def send(phoneNumber,consultant,requestTitle):
-            # token = KakaoToken.objects.get(id=1)
-            # Authorization = token.token
-            
-            # url = 'https://api.bizppurio.com/v3/message'
-            # data = {
-            #     'account': 'boltnnut_korea', 
-            #     'refkey': 'bolt123', 
-            #     'type': 'at', 
-            #     'from': '01028741248',
-            #     'to': phoneNumber, 
-            #     'content': {
-            #         'at': {
-            #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_request_review',
-            #             'message': '안녕하세요. 볼트앤너트입니다.\n\n의뢰주신 ' + requestTitle + '에 대한 ' +consultant +'님의 상담은 어떠셨나요?\n\n 부족한 점이나 칭찬할만한 점이 있다면 첨부된 링크에서 리뷰를 작성해주세요.\n\n매달 리뷰를 작성해주신 고객분들 중 한 분을 선발하여 무료 모델링 서비스를 제공하고 있습니다.',
-            #             'button': [
-            #                 {
-            #                     'name': '리뷰하러가기',
-            #                     'type': 'WL',
-            #                     'url_mobile': 'https://www.boltnnut.com/',
-            #                     'url_pc': 'https://www.boltnnut.com/'
-            #                 }
-            #             ]
-            #         }
-            #     }
-            # }
-            # headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-            # response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
-
-class kakaotalk_send_request_rerequest():
-        def send(phoneNumber,requestTitle):
-            # token = KakaoToken.objects.get(id=1)
-            # Authorization = token.token
-            # boltnnutPhone = "02-996-6637"
-            # boltnnutEmail = "boltnnut@boltnnut.com"
-            # url = 'https://api.bizppurio.com/v3/message'
-            # data = {
-            #     'account': 'boltnnut_korea', 
-            #     'refkey': 'bolt123', 
-            #     'type': 'at', 
-            #     'from': '01028741248',
-            #     'to': phoneNumber, 
-            #     'content': {
-            #         'at': {
-            #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'bizp_2021020216131026670531311',
-            #             'message': '안녕하세요. 볼트앤너트입니다.\n\n요청 주신 의뢰 : ' + requestTitle + '에는 전문가인\n\n최진영 기술이사님이 배정되어 있습니다.\n\n의뢰 기본정보와 5가지 선택질문만 답변해주시면 '+requestTitle+'의 가견적과\n\n전문 컨설턴트 상담을 무료로 받을 수 있으니 확인해보세요.\n\n온라인 의뢰 작성 시에 불편한 사항이 있었다면 '+ boltnnutPhone +' 혹은\n\n' + boltnnutEmail +'로 연락주세요.',
-            #             'button': [
-            #                 {
-            #                     'name': '의뢰작성하러가기',
-            #                     'type': 'WL',
-            #                     'url_mobile': 'http://www.boltnnut.com/',
-            #                     'url_pc': 'http://www.boltnnut.com/'
-            #                 }
-            #             ]
-            #         }
-            #     }
-            # }
-            # headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-            # response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
-
-class kakaotalk_send_appreciate():
-        def send(phoneNumber,requestTitle):
-            # token = KakaoToken.objects.get(id=1)
-            # Authorization = token.token
-            # boltnnutPhone = "02-996-6637"
-            # boltnnutEmail = "boltnnut@boltnnut.com"
-            # url = 'https://api.bizppurio.com/v3/message'
-            # data = {
-            #     'account': 'boltnnut_korea', 
-            #     'refkey': 'bolt123', 
-            #     'type': 'at', 
-            #     'from': '01028741248',
-            #     'to': phoneNumber, 
-            #     'content': {
-            #         'at': {
-            #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_appreciate',
-            #             'message': '안녕하세요. 볼트앤너트입니다.\n\n볼트앤너트에 '+requestTitle +'의뢰를 주셔서 감사합니다.\n\n저희 볼트앤너트 서비스가 부족한 점이나 칭찬할만한 점이 있다면 첨부된 링크에서 리뷰를 작성해주세요.\n\n고객님께서 주신 소중한 의견 하나하나 귀기울여 듣고 부족한 점을 개선하도록 하겠습니다.\n\n매달 리뷰를 작성해주신 고객분들 중 한 분을 선발하여 무료 모델링 서비스를 제공하고 있습니다.\n\n볼트앤너트는 고객 분들의 의뢰 물품을 최적의 가격에 제대로 만들어드릴 수 있도록 노력하겠습니다.',
-            #             'button': [
-            #                 {
-            #                     'name': '리뷰하러가기',
-            #                     'type': 'WL',
-            #                     'url_mobile': 'https://www.boltnnut.com/',
-            #                     'url_pc': 'https://www.boltnnut.com/'
-            #                 }
-            #             ]
-            #         }
-            #     }
-            # }
-            # headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-            # response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
-
-class kakaotalk_archiving_after_meeting():
-        def send(phoneNumber,requestTitle):
-            # token = KakaoToken.objects.get(id=1)
-            # Authorization = token.token
-            # boltnnutPhone = "02-996-6637"
-            # boltnnutEmail = "boltnnut@boltnnut.com"
-            # url = 'https://api.bizppurio.com/v3/message'
-            # data = {
-            #     'account': 'boltnnut_korea', 
-            #     'refkey': 'bolt123', 
-            #     'type': 'at', 
-            #     'from': '01028741248',
-            #     'to': phoneNumber, 
-            #     'content': {
-            #         'at': {
-            #             'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'templatecode': 'send_appreciate',
-            #             'message': '안녕하세요. 볼트앤너트입니다.\n\n볼트앤너트에 '+requestTitle +'의뢰를 주셔서 감사합니다.\n\n저희 볼트앤너트 서비스가 부족한 점이나 칭찬할만한 점이 있다면 첨부된 링크에서 리뷰를 작성해주세요.\n\n고객님께서 주신 소중한 의견 하나하나 귀기울여 듣고 부족한 점을 개선하도록 하겠습니다.\n\n매달 리뷰를 작성해주신 고객분들 중 한 분을 선발하여 무료 모델링 서비스를 제공하고 있습니다.\n\n볼트앤너트는 고객 분들의 의뢰 물품을 최적의 가격에 제대로 만들어드릴 수 있도록 노력하겠습니다.',
-            #             'button': [
-            #                 {
-            #                     'name': '의뢰작성하러가기',
-            #                     'type': 'WL',
-            #                     'url_mobile': 'https://www.boltnnut.com/',
-            #                     'url_pc': 'https://www.boltnnut.com/'
-            #                 }
-            #             ]
-            #         }
-            #     }
-            # }
-            # headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-            # response = requests.post(url, data=json.dumps(data), headers=headers)
-            # return response
-            return
-            
-# #-----------------------------------------------------------------------------------------------------------------#
-
 class kakaotalk_send_response_msg():
         def send(phone_list, requestTitle):
             for phone in phone_list:
@@ -571,47 +265,6 @@ class kakaotalk_send_msg_request_week():
                 response = requests.post(url, data=json.dumps(data), headers=headers)
                 return response
 
-# class kakaotalk_send_detail_inform():
-#         def send(phone_list, requestTitle):
-#             token = KakaoToken.objects.get(id=1)
-#             Authorization = token.token
-#             boltnnutPhone = "02-996-6637"
-#             boltnnutEmail = "boltnnut@boltnnut.com"
-#             url = 'https://api.bizppurio.com/v3/message'
-#             data = {
-#                 'account': 'boltnnut_korea',
-#                 'refkey': 'bolt123', 
-#                 'type': 'at', 
-#                 'from': '01028741248',
-#                 'to': phone_list,
-#                 'content': {
-#                     'at': {
-#                         'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'notice_partner',
-#                         'message': "안녕하세요. 볼트앤너트입니다.\n"+requestTitle +"의뢰에 대한 채팅이 시작되었습니다.\n준비가 되셨으면 시작해주세요.",
-#                     }
-#                 }
-#             }
-#             headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-#             response = requests.post(url, data=json.dumps(data), headers=headers)
-#             return response
-
-# class kakaotalk_send_chat_alarm():
-#         def send(phone):
-#             url = 'https://api.bizppurio.com/v3/message'
-#             data = {
-#                 'account': 'boltnnut_korea',
-#                 'refkey': 'bolt123', 
-#                 'type': 'at', 
-#                 'from': '01028741248',
-#                 'to': phone,
-#                 'content': {
-#                     'at': {
-#                         'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98', 'template_code': 'send_chat_alarm',
-#                         'message': "안녕하세요. 볼트앤너트입니다.\n채팅에 대한 답변이 도착했습니다.",
-#                     }
-#                 }
-#             }
-            
 class kakaotalk_send_msg_response():
         # 제조사의 채팅에 답변을 하지 않고 2일이 지난 경우 (의뢰당 1번만)
         def send(phone_list, requestTitle, partner_name):
@@ -642,44 +295,6 @@ class kakaotalk_send_msg_response():
                         }
                     }
                 }
-
-# 수정 후
-# class kakaotalk_request_answer():
-#         def send(phone,requestTitle):
-#             token = KakaoToken.objects.get(id=1)
-#             Authorization = token.token
-#             boltnnutPhone = "02-996-6637"
-#             boltnnutEmail = "boltnnut@boltnnut.com"
-#             url = 'https://api.bizppurio.com/v3/message'
-#              data = {
-#                 'account': 'boltnnut_korea',
-#                 'refkey': 'bolt123',
-#                 'type': 'at',
-#                 'from': '01028741248',
-#                 'to': phone,
-#                 'content': {
-#                     'at': {
-#                         'senderkey': '44e4fdc989b12906c82fc46e428dd91dd99f0d98',
-#                         'templatecode': 'request',
-#                         'message': '안녕하세요.' + phone.username + '님 상담 요청하신' + requestTitle + '에 적합한 제조사가 문의 사항에 대한 댓글을 달아 주셨어요\n\n 댓글 내용을 확인해보시고 추가로 궁금하신 사항이 있다면 해당 제조사와의 소통을 통해 문의해주세요',
-#                         'button': [
-#                             {
-#                                 'name': '댓글 확인하기',
-#                                 'type': 'WL',
-#                                 'url_mobile': 'https://www.boltnnut.com/'',
-#                                 'url_pc': 'https://www.boltnnut.com/'
-#                             }
-#                         ]
-#                     }
-#                 }
-#             }
-#             headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'Authorization': Authorization}
-#             response = requests.post(url, data=json.dumps(data), headers=headers)
-#             return response
-
-
-
-
 
 class kakaotalk_send_answer_to_client():
     def send(phone, username, requestTitle):
@@ -729,10 +344,6 @@ class kakaotalk_send_answer_to_client():
         response = requests.post(url, data=json.dumps(data), headers=headers)
         print(response.json())
         return response
-
-
-
-
 
 
 
@@ -875,18 +486,56 @@ class jandi_webhook_project():
         response = requests.post(url, data=json.dumps(data), headers=headers)
         return response
 
+    
+class jandi_webhook_QnA():
+    def send_question(partner,client,content):
+        url = 'https://wh.jandi.com/connect-api/webhook/18069463/bf7dce120b1a85f9478b8460db6d07ad'
+        headers = {
+            'Accept': 'application/vnd.tosslab.jandi-v2+json',
+            'Content-Type': 'application/json'
+        }
+        data = {
+            "body" : "[볼트앤너트] " +client+"님이 "+"파트너 "+partner+" 상세페이지에"+" 질문을 남겼습니다.. \n 내용 :" + content,
+            }
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+        return response
+
+    def send_answer_partner(partner,client,question,content):
+        url = 'https://wh.jandi.com/connect-api/webhook/18069463/bf7dce120b1a85f9478b8460db6d07ad'
+        headers = {
+            'Accept': 'application/vnd.tosslab.jandi-v2+json',
+            'Content-Type': 'application/json'
+        }
+        data = {
+            "body" : "[볼트앤너트] " +client+"님이 "+"파트너 "+partner+" 상세페이지에 질문:"+question + "  에 대한 재질문을 남겼습니다.. \n 내용 :" + content,
+            }
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+        return response
+
+    def send_answer_client(partner,question,content):
+        url = 'https://wh.jandi.com/connect-api/webhook/18069463/bf7dce120b1a85f9478b8460db6d07ad'
+        headers = {
+            'Accept': 'application/vnd.tosslab.jandi-v2+json',
+            'Content-Type': 'application/json'
+        }
+        data = {
+            "body" : "파트너 "+partner+" 상세페이지에 질문:"+question + "  에 대한 답글을 남겼습니다.. \n 내용 :" + content,
+            }
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+        return response
 
 class getIp():
     def get(a,b):
+        #if문을 통해서 ip가 생김
         x_forwarded_for = a
         if x_forwarded_for:
             ip = x_forwarded_for.split(',')[0]
         else:
             ip = b
 
-        if ip == '59.5.24.185' or ip == '211.196.18.225' or ip =='211.216.28.238' or ip =='211.196.18.140' or ip =='221.155.218.99' or ip =='14.39.62.53' or ip =='211.196.18.166' or ip=='172.30.1.3' or ip=='175.192.216.211' or ip=='211.216.28.238'or ip=='61.72.243.246':
-            ip = '0.0.0.0'
-        
+        #회사 ip차단
+        if ip == '59.5.24.185' or ip == '211.196.18.225' or ip =='211.216.28.238' or ip =='221.155.218.99' or ip =='14.39.62.53' or ip =='211.196.18.166' or ip=='172.30.1.3' or ip=='175.192.216.211' or ip=='211.216.28.238'or ip=='61.72.243.246' or ip=='211.216.20.250' or ip =='218.155.48.170' or ip =='59.5.24.185' or ip == '220.116.11.139'or ip == '59.5.75.76':
+            ip = '0.0.0.0' 
         
         return ip
 
@@ -894,6 +543,7 @@ class getIp():
 
 class sendEmail():
     def send(username):
+        #이메일 템플릿 만들기
         recipient = [username]
         sender = "boltnnut@boltnnut.com"
         image_path = '/home/ubuntu/staging/boltnnut_platform/media/account/signUpGreeting.jpg'
@@ -916,25 +566,125 @@ class sendEmail():
                 </body>
             </html>
         """
+
+        #이메일에 jpg파일 첨부하기
         email = EmailMultiAlternatives(subject=subject, body=text_message, from_email=sender, to=recipient)
         if all([html_message,image_path,image_name]):
             email.attach_alternative(html_message, "text/html")
             email.content_subtype = 'html' 
             email.mixed_subtype = 'related' 
             with open(image_path, mode='rb') as f:
-                image = MIMEImage(f.read(),_subtype="jpg")
+                image = MIMEImage(f.read(),_subtype="jpg",Name='서비스 소개서')
                 email.attach(image)
                 image.add_header('Content-ID', f"<{image_name}>")
         email.send()
 
 
 
+                  
+    def send_email(email):
+        smtp_info = dict(
+                         {"smtp_server" : "smtp.gmail.com",
+                          "smtp_user_id" : "boltnnut@boltnnut.com" ,
+                          "smtp_user_pw" : "hppsgcaehybluwsr" ,
+                          "smtp_port" : 587}
+                        )
+
+        msg_dict = {
+            'image' : {'maintype' : 'image', 'subtype' :'jpg', 'filename' :'/home/ubuntu/staging/boltnnut_platform/media/account/signUpGreeting.jpg'}, # 이미지 첨부파일
+        }
+
+        title = "[온라인 제조 플랫폼] 전국 제조사 정보 다 있다, 볼트앤너트에 회원 가입이 완료되었습니다."
+        content = "[온라인 제조 플랫폼] 전국 제조사 정보 다 있다, 볼트앤너트에 회원 가입이 완료되었습니다."
+        sender = "boltnnut@boltnnut.com"
+        receiver =  email
+
+        # 메일 내용
+        msg = MIMEText(_text = content, _charset = "utf-8") 
+
+        # 첨부파일 추가
+        multi = sendEmail.make_multimsg(msg_dict,receiver)
+        multi['subject'] = title  
+        multi['from'] = sender  
+        multi['to'] = receiver     
+        multi.attach(msg)
+       
+        with smtplib.SMTP(smtp_info["smtp_server"], smtp_info["smtp_port"]) as server:
+            # TLS 보안 연결
+            server.starttls() 
+            # 로그인
+            server.login(smtp_info["smtp_user_id"], smtp_info["smtp_user_pw"])
+            # 로그인 된 서버에 이메일 전송
+            response = server.sendmail(multi['from'], multi['to'], multi.as_string()) # 메시지를 보낼때는 .as_string() 메소드를 사용해서 문자열로 바꿔줍니다.
 
 
+    def make_multimsg(msg_dict,username):
 
+        multi = MIMEMultipart(_subtype='mixed')
+        image_path = '/home/ubuntu/staging/boltnnut_platform/media/account/signUpGreeting.jpg'
+        image_name = Path(image_path).name
+
+        html_message = f"""
+        <!doctype html>
+            <html lang=en>
+                <head>
+                    <meta charset=utf-8>
+                    <title>Some title.</title>
+                </head>
+                <body>
+                    <h3>"[온라인 제조 플랫폼] 전국 제조사 정보 다 있다, 볼트앤너트에 회원 가입이 완료되었습니다."</h1>
+                    <p>
+                    {username}님, 볼트앤너트에 가입해 주셔서 감사합니다.<br>
+                    <img style="width: 800px;" src='cid:{image_name}'/>
+                    </p>
+                </body>
+            </html>
+        """
+        html_body = MIMEText(html_message, 'html')
+        multi.attach(html_body)
+
+        for key, value in msg_dict.items():
+            with open(value['filename'], 'rb') as fp:
+                msg = MIMEImage(fp.read(), _subtype=value['subtype'],Name='서비스 소개서')
+            msg.add_header('Content-ID', f"<{image_name}>")
+            multi.attach(msg)
+        
+        return multi
 
 
 class ImgSearch():
+
+    def upload_blob(bucket_name,destination_blob_name, url,id):
+        # bucket_name = "your-bucket-name"
+        # source_file_name = "local/path/to/file"
+        # destination_blob_name = "storage-object-name"
+        try :
+            s3_path = "https://boltnnutplatform.s3.amazonaws.com/media/"
+            source_file_name = os.path.dirname(os.path.abspath(__file__))  + '/temp_img/' + id
+            img_url = s3_path + url
+            print(img_url +" s3에서 버킷으로 저장시작" +source_file_name)
+            urllib.request.urlretrieve(img_url, source_file_name)
+
+            print(id +"s3에서 버킷으로 저장완료")
+            time.sleep(0.01)
+
+            print(id +"google 저장시작")
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(destination_blob_name)
+            blob.upload_from_filename(source_file_name)
+
+            print(
+                "File {} uploaded to {}. \n".format(
+                    source_file_name, destination_blob_name
+                )
+            )
+            time.sleep(0.01)
+            os.remove(source_file_name)
+        except Exception as e :
+            print(e)
+            ImgSearch.upload_blob(bucket_name,destination_blob_name, url,id)
+
     def url(image_uri):            
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/home/ubuntu/staging/boltnnut_platform/.config/google/bolt-nut-289101-3be9837f46a7.json"
         project_id = 'bolt-nut-289101'
@@ -1045,127 +795,58 @@ class ImgSearch():
 
 
     def dataset(low_ID) :
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/home/ubuntu/staging/boltnnut_platform/.config/google/bolt-nut-289101-3be9837f46a7.json"
+        #vision
+        project_id = 'bolt-nut-289101'
+        location = 'asia-east1'
+        product = 'product_set1'
+        product_category = 'general-v1'
+        bucket_name = "boltnnut"
 
-        pass
-        # now = datetime.datetime.now()
-        # date = str(now.year)+'.'+str(now.month)+'.'+str(now.day)+'.'
-        # path = 'portfolio_img-'+date
+        #google storage
+        date_str =str(datetime.datetime.today()).split(" ")[0]
+        gs_path =  "portfolio_img-"+date_str+"/"
+        csv_name = "Portfolio-"+date_str+".csv"
+        csv_path_local = os.path.dirname(os.path.abspath(__file__))  + '/temp_img/' + csv_name
+
+
+
         
-        # #pf = Portfolio.objects.get.(low_ID)
-
-        # temp_path = "/temp_img/" + str(low_ID) 
-        # #str(pf.img_portfoli)
+        # low_Id보다 큰 포트폴리오에 접근
+        pf_qs = Portfolio.objects.filter(id__gte = low_ID).order_by("-id")
         
-        # s3_client = boto3.client('s3',aws_access_key_id='AKIATYAEQEY5RQM64SEC',aws_secret_access_key='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')
-        # s3_client.download_file('boltnnutplatform', "portfolio/2021/7/23/8d6b4b8182f54730b6e763d87712157f_portfolio.jpg",  temp_path)
 
-
-class imgUpload():
-    def save():
-        path = '/Users/iyuchang/Downloads/회사소개서_신유선/'
-        file_list = os.listdir(path)
-        for i in file_list:
-            print(i)
-            if i != '.DS_Store':
-                uni1 = unicodedata.normalize('NFC',i)
-                partner = Partner.objects.filter(name=uni1)
-                if partner:
-                    newpath = path+i
-                    file_list = os.listdir(newpath)
-                    for j in file_list:
-                        j = unicodedata.normalize('NFC',j)
-                        if j != '.DS_Store':
-                            buffer = BytesIO()
-                            j_=j.split('.')
-                            if j_[-1] !='html' and j_[-1] !='PDF' and j_[-1]!='JFIF' and j_[-1]!='jfif':
-                                if j_[-1]=='pptx':
-                                    #pptx
-                                    pr=Presentation(newpath+'/'+j)
-                                    pr.save(buffer)
-                                    pptx_file = InMemoryUploadedFile(buffer, None, j, 'application/vnd.openxmlformats-officedocument.presentationml.presentation', sys.getsizeof(pr), None)
-                                    partner[0].file.save(j,pptx_file)
-
-                                elif j_[-1]=='pdf':
-                                    #pdf
-                                    file = open(newpath+'/'+j, 'rb')
-                                    pdf_file = InMemoryUploadedFile(file, None, j, 'application/pdf', sys.getsizeof(file), None)
-                                    partner[0].file.save(j,pdf_file)
-
-                                else:
-                                    #이미지
-                                    im=Image.open(newpath+'/'+j)
-                                    if j_[-1] == 'jpg' or j_[-1]=='JPG':
-                                        im=im.convert('RGB')
-                                        j_[-1]='jpeg'
-                                    im.save(buffer, j_[-1])
-                                    image_file = InMemoryUploadedFile(buffer, None, j, 'image/'+j_[-1], im.size, None)
-
-                                    Portfolio.objects.create(
-                                        partner = partner[0],
-                                        img_portfolio = image_file,
-                                        name = j_[0]
-                                    )
-    def fileupload():
-            path = '/Users/iyuchang/Downloads/0813.csv'
-            csv_file = pd.read_csv(path, error_bad_lines=False)
-            csv_file_values = csv_file.values
-            count = 605240
-
-            for row in csv_file_values:
-                
-                if Partner.objects.filter(name=row[3]):
-                    continue
-                else:
-                    count += 1
-                    city_name = City.objects.filter(maincategory = row[10])
-
-                    row[5] = str(row[5]).replace('-','').replace(')','').replace('(','').replace('.','').strip()
-
-                    if not isinstance(row[2],str):
-                        row[2] = '안녕하세요 , '+row[3]+'입니다. 저희는 '+row[7]+'를 전문으로 하고 있습니다.'
-
-
-                    if city_name:
-
-                        user = User.objects.create(
-                            username = f'boltnnut{count}' + '@boltnnut.com',
-                            password = '1234',
-                            phone = row[5],
-                            type = 1,
-                        )
-                        
-                        partner = Partner.objects.create(
-                            user = user,
-                            name = row[3],
-                            city = city_name[0],
-                            info_company = row[2],
-                            history = row[7],
-                            region = row[13],
-                            certification_list = row[14],
-                            logo='null'
-                        )
-                    else:
-                        user = User.objects.create(
-                            username = f'boltnnut{count}' + '@boltnnut.com',
-                            password = '1234',
-                            phone = row[5],
-                            type = 1,
-                        )
-                        
-                        partner = Partner.objects.create(
-                            user = user,
-                            name = row[3],
-                            info_company = row[2],
-                            history = row[7],
-                            region = row[13],
-                            certification_list = row[14],
-                            logo='null'
-                        )
-                    
-                    # for el in category_middle_list:
-                    #     develop_name = Develop.objects.filter(category = el)
-                    #     partner.category_middle.add(*develop_name)
-                    #     partner.save()
-
-    
+        output_csv = []
+        count=0
+        for pf in pf_qs :
+            #s3에서 google data studio로 이동
+            pf_url = str(pf.img_portfolio)
+            img_url = gs_path+str(pf.id)
             
+            
+            ImgSearch.upload_blob(bucket_name, img_url, pf_url, str(pf.id))
+            count+= 1
+
+
+
+            #make csv
+            img_id = str(pf.id)
+            product_set_id = "product_set1"
+            product_id = "product_id" + str(pf.id)
+            category = "general-v1"
+            pdn = ""
+            label = ""
+            bound_box =""
+
+            row_list = [img_url,img_id,product_set_id,product_id,category,pdn,label,bound_box]
+            output_csv.append(row_list)
+            
+        with open(csv_path_local,'w') as file :
+            write = csv.writer(file)
+            write.writerows(output_csv)
+
+        print(count +'개 업로드\n' '쿼리셋 개수 : '+ count(pf_qs))
+        
+        
+            
+        
