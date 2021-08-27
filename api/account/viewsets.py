@@ -1421,166 +1421,25 @@ class PartnerReviewViewSet(viewsets.ModelViewSet):
     queryset = PartnerReview.objects.all()
     serializer_class = PartnerReviewSerializer
 
-    @action(detail=False, methods=('POST',), url_path='create', http_method_names=('post',))
-    def partnerreview(self, request, *args, **kwargs):
-        request_partner = request.data.get('partner')
-        request_client = request.data.get('client')
-        projectname = request.data.get('projectname')
-        consult_score = request.data.get('consult_score')
-        kindness_score = request.data.get('kindness_score')
-        communication_score = request.data.get('communication_score')
-        profession_score = request.data.get('profession_score')
-        content = request.data.get('content')
-        partner_name = request.data.get('partner_name')
-        # 0일 경우 기존 제조사 1일 경우 리뷰저장 제조사
+    class PartnerReviewViewSet(viewsets.ModelViewSet):
+        queryset = PartnerReview.objects.all()
+    serializer_class = PartnerReviewSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields =  '__all__'
+
+    def create(self, request, *args, **kwargs):
         new_partner = request.data.get('new_partner')
-        date = request.data.get('date')
         
-        if str(new_partner) == '0':
-            partner = Partner.objects.filter(id=request_partner)
-            client = Client.objects.filter(id=request_client)
+        if str(new_partner) == '1':
+            request.data._mutable = True
+            request.data['partner'] = 1
+            request.data._mutable = False 
 
-            PartnerReview.objects.create(
-                partner=partner[0],
-                client=client[0],
-                projectname=projectname,
-                consult_score=consult_score,
-                kindness_score=kindness_score,
-                communication_score=communication_score,
-                profession_score=profession_score,
-                content=content,
-                date=date,
-                # 0일 경우 기존 제조사 1일 경우 리뷰저장 제조사
-                new_partner=new_partner,
-                partner_name=partner_name,
-            )
-
-            return Response(
-                status=status.HTTP_201_CREATED,
-                data={'message': '리뷰저장 성공'},
-            )
-        elif str(new_partner) == '1':
-            review_partner = Partner.objects.get(id=1)
-            client = Client.objects.filter(id=request_client)
-
-            PartnerReview.objects.create(
-                partner=review_partner,
-                client=client[0],
-                projectname=projectname,
-                consult_score=consult_score,
-                kindness_score=kindness_score,
-                communication_score=communication_score,
-                profession_score=profession_score,
-                content=content,
-                date=date,
-                # 0일 경우 기존 제조사 1일 경우 리뷰저장 제조사
-                new_partner=new_partner,
-                partner_name=partner_name,
-            )
-        
-        return Response(
-            status=status.HTTP_201_CREATED,
-            data={'data' : '제조사 정보 저장, 리뷰 저장 성공'},
-        )
-
-    @action(detail=False, methods=('GET',), url_path='partner-filter', http_method_names=('get',))
-    def partnerfilter(self, request, *args, **kwargs):
-        partner_id = request.GET.dict()['partner_id']
-        page_nation = request.GET.dict()['page_nation']
-        partner_info = PartnerReview.objects.filter(partner=partner_id).order_by('-id')
-        partner_info_len = len(partner_info)
-        page_nation_int = int(page_nation)
-
-        paginator = Paginator(partner_info, 10)
-        page_number = request.GET.get('page')
-        int_pagenumber = int(page_number)
-        page_obj = paginator.get_page(page_number)
-
-        next_page_obj = int_pagenumber + 1
-        prev_page_obj = int_pagenumber - 1
-
-        total_pages = math.ceil(len(partner_info) / 10)
-
-        if partner_info_len == 0:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={
-                    'message': '일치하는 파트너 아이디가 데이터가 없습니다.'}
-            )
-
-        if int_pagenumber > total_pages:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={
-                    'message': '페이지를 찾을 수 없습니다.',
-                }
-            )
-
-        if page_nation_int == 1:
-            return Response(
-                status=status.HTTP_200_OK,
-                data={
-                    'count': partner_info_len,
-                    'next': f'https://api.boltnnut.com/partner-review/partner_filter?partner_id={partner_id}&page_nation=1&page={next_page_obj}',
-                    'previous': f'https://api.boltnnut.com/partner-review/partner_filter?partner_id={partner_id}&page_nation=1&page={prev_page_obj}',
-                    'current': PartnerReviewSerializer(page_obj, many=True).data,
-                },
-            )
-        if partner_info.exists():
-            return Response(
-                status=status.HTTP_200_OK,
-                data={'data': partner_info.values()}
-            )
-
-
-    @action(detail=False, methods=('GET',), url_path='total_score', http_method_names=('get',))
-    def total_score(self, request, *args, **kwargs):
-        partner_id = request.GET.dict()['partner_id']
-        partner_info = PartnerReview.objects.filter(partner=partner_id).order_by('-id')
-        partner_info_len = len(partner_info)
-
-
-        if partner_info_len == 0:
-            return Response(
-                status=status.HTTP_200_OK,
-                data={
-                    'score': -1}
-            )
-
-
-        else :
-            total = 0
-            for p in partner_info :
-                total = total + p.consult_score
-            
-            total_score = round(total/partner_info_len, 2)
-
-            return Response(
-                status=status.HTTP_200_OK,
-                data={
-                    'score': total_score}
-            )
-
-
-
-    @action(detail=False, methods=('GET',), url_path='client_filter', http_method_names=('get',))
-    def clientfilter(self, request, *args, **kwargs):
-        client_id = request.GET.dict()['client_id']
-        client_info = PartnerReview.objects.filter(client=client_id)
-        client_info_len = len(client_info)
-
-        if client_info_len == 0:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={
-                    'message': '일치하는 클라이언트 아이디가 없습니다.'}
-            )
-
-        if client_info.exists():
-            return Response(
-                status=status.HTTP_200_OK,
-                data={'data': client_info.values()}
-            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class PartnerReviewTempViewSet(viewsets.ModelViewSet):
     """
